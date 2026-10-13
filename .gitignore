@@ -13,10 +13,6 @@
 *.unityproj
 *.sln
 *.suo
-*.tmp
-
-# Meta
-*.meta
 
 # OS
 .DS_Store
