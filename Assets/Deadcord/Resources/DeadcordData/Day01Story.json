@@ -1,0 +1,47 @@
+{
+  "events": [
+    {
+      "atSeconds": 1,
+      "speakerKey": "boss",
+      "username": "StarshiyMod",
+      "text": "Добро пожаловать на смену. Инструкции на сегодня — в #модерация."
+    },
+    {
+      "atSeconds": 5,
+      "speakerKey": "coworker",
+      "username": "Bober_Staff",
+      "text": "Главное — не пропускай нарушения, начальник сегодня злой."
+    },
+    {
+      "atSeconds": 9,
+      "speakerKey": "coworker",
+      "username": "Bober_Staff",
+      "text": "И да, если DeadcordHelper начал печатать, лучше поторопись."
+    },
+    {
+      "atSeconds": 13,
+      "speakerKey": "plot_user_01",
+      "username": "VasyaKaban_228",
+      "text": "Ты тупой кретин, модератор",
+      "incidentCategory": "insult"
+    },
+    {
+      "atSeconds": 24,
+      "speakerKey": "coworker",
+      "username": "Bober_Staff",
+      "text": "У нас тут сегодня особенный наплыв странных типов. Удачи."
+    },
+    {
+      "atSeconds": 51,
+      "speakerKey": "boss",
+      "username": "StarshiyMod",
+      "text": "Обновление правил опубликовано в #модерация. Ознакомьтесь немедленно."
+    },
+    {
+      "atSeconds": 96,
+      "speakerKey": "boss",
+      "username": "StarshiyMod",
+      "text": "Ещё одно обновление правил. Проверьте третью волну в #модерация."
+    }
+  ]
+}
