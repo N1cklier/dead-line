@@ -7,6 +7,12 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+        // ЕСЛИ МЫ НЕ В РЕАЛЬНОСТИ (например, сидим в чате или игра окончена) — ПЕРСОНАЖ НЕ ХОДИТ
+        if (GameManager.Instance != null && GameManager.Instance.currentMode != GameManager.Mode.Reality)
+            return;
+
+        if (Keyboard.current == null) return;
+
         float h = Keyboard.current.aKey.isPressed ? -1f : (Keyboard.current.dKey.isPressed ? 1f : 0f);
         float v = Keyboard.current.wKey.isPressed ? 1f : (Keyboard.current.sKey.isPressed ? -1f : 0f);
 

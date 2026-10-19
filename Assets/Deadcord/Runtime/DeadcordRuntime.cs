@@ -39,7 +39,6 @@ public class DeadcordRuntime : MonoBehaviour
     private Sprite _uiSprite;
     private Sprite _avatarSprite;
 
-    private GameManager _gameManager;
     private PlayerMovement[] _playerMovements;
     private readonly List<bool> _playerMovementWasEnabled = new List<bool>();
     private bool _cursorWasVisible;
@@ -75,7 +74,6 @@ public class DeadcordRuntime : MonoBehaviour
     private float _nextWaveAt;
     private int _waveIndex;
     private int _nextStoryIndex;
-    private float _localReputation = 50f;
     private int _incidentSequence;
 
     private NamePartsData _nameParts;
@@ -129,77 +127,71 @@ public class DeadcordRuntime : MonoBehaviour
         if (!_initialized)
             return;
 
-        FindAssetsAndManagers();
-        LockWorldControls();
-
-        if (_gameManager != null)
-            _gameManager.SetMode(GameManager.Mode.Chat);
-
         if (!_shiftStarted)
             BeginShift();
 
         SetChannel(false);
     }
 
-    private void OnDisable()
-    {
-        RestoreWorldControls();
-    }
-
     private void Update()
     {
-        if (!_initialized || !isActiveAndEnabled)
+        // УБИРАЕМ проверку на !isActiveAndEnabled, чтобы скрипт тикал даже когда панель скрыта!
+        if (!_initialized)
             return;
 
-        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
-        {
-            CloseDeadcord();
-            return;
-        }
-
-        if (_shiftEnded)
-        {
-            RefreshStatusUI();
-            return;
-        }
-
-        if (!_showingModeration && _commandInput != null && _commandInput.isFocused && Keyboard.current != null)
-        {
-            bool enterPressed = Keyboard.current.enterKey.wasPressedThisFrame || Keyboard.current.numpadEnterKey.wasPressedThisFrame;
-            if (enterPressed)
-                SubmitCommandInput();
-        }
-
+        // Если чат закрыт (мы в реальности), мы ВСЁ РАВНО крутим таймеры и генерируем сообщения в фоне:
         _shiftElapsed += Time.unscaledDeltaTime;
         AdvanceWaves();
         PlayStoryEvents();
         SpawnNpcMessageIfDue();
         UpdateIncidentTimer();
-        RefreshStatusUI();
+
+        // А вот ввод текста и ESC обрабатываем ТОЛЬКО если чат реально открыт перед глазами:
+        if (GameManager.Instance != null && GameManager.Instance.currentMode == GameManager.Mode.Chat)
+        {
+            if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+            {
+                CloseDeadcord();
+                return;
+            }
+
+            if (!_shiftEnded && !_showingModeration && _commandInput != null && _commandInput.isFocused && Keyboard.current != null)
+            {
+                bool enterPressed = Keyboard.current.enterKey.wasPressedThisFrame || Keyboard.current.numpadEnterKey.wasPressedThisFrame;
+                if (enterPressed)
+                    SubmitCommandInput();
+            }
+
+            RefreshStatusUI();
+        }
     }
 
     #endregion
 
     #region Data
 
-    [Serializable] private class NamePartsData
+    [Serializable]
+    private class NamePartsData
     {
         public string[] first;
         public string[] second;
         public string[] third;
     }
 
-    [Serializable] private class NormalMessagesData
+    [Serializable]
+    private class NormalMessagesData
     {
         public string[] messages;
     }
 
-    [Serializable] private class ViolationsData
+    [Serializable]
+    private class ViolationsData
     {
         public ViolationDefinition[] incidents;
     }
 
-    [Serializable] private class ViolationDefinition
+    [Serializable]
+    private class ViolationDefinition
     {
         public string id;
         public string category;
@@ -208,12 +200,14 @@ public class DeadcordRuntime : MonoBehaviour
         public string[] messages;
     }
 
-    [Serializable] private class WaveRulesData
+    [Serializable]
+    private class WaveRulesData
     {
         public WaveDefinition[] waves;
     }
 
-    [Serializable] private class WaveDefinition
+    [Serializable]
+    private class WaveDefinition
     {
         public int wave;
         public string title;
@@ -223,12 +217,14 @@ public class DeadcordRuntime : MonoBehaviour
         public string[] unlockedCategories;
     }
 
-    [Serializable] private class StoryData
+    [Serializable]
+    private class StoryData
     {
         public StoryEvent[] events;
     }
 
-    [Serializable] private class StoryEvent
+    [Serializable]
+    private class StoryEvent
     {
         public float atSeconds;
         public string speakerKey;
@@ -369,39 +365,32 @@ public class DeadcordRuntime : MonoBehaviour
 
     private void FindAssetsAndManagers()
     {
-        _gameManager = FindObjectOfType<GameManager>();
         _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         if (_font == null)
             _font = Resources.GetBuiltinResource<Font>("Arial.ttf");
-        _uiSprite = Resources.GetBuiltinResource<Sprite>("UI/Skin/UISprite.psd");
-        _avatarSprite = Resources.GetBuiltinResource<Sprite>("UI/Skin/Knob.psd");
 
-        // Fallback texture prevents the UI from becoming invisible if a Unity version
-        // does not expose the built-in uGUI sprites under these resource names.
         if (_uiSprite == null)
         {
             Texture2D whiteTexture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
             whiteTexture.name = "Deadcord_RuntimeWhiteTexture";
             whiteTexture.SetPixel(0, 0, Color.white);
             whiteTexture.Apply();
-            _uiSprite = Sprite.Create(whiteTexture, new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f));
-            _uiSprite.name = "Deadcord_RuntimeWhiteSprite";
+            _uiSprite = Sprite.Create(whiteTexture, new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect, new Vector4(4, 4, 4, 4));
+            _uiSprite.name = "Deadcord_RuntimeUISprite";
         }
+
         if (_avatarSprite == null)
+        {
             _avatarSprite = _uiSprite;
+        }
     }
 
     private void BuildInterface()
     {
-        if (hideOldPanelChildren)
-        {
-            for (int i = transform.childCount - 1; i >= 0; i--)
-                transform.GetChild(i).gameObject.SetActive(false);
-        }
-
+        // Убираем выключение детей через SetActive, чтобы объект панели всегда оставался активным для фона!
         EnsureEventSystem();
 
-        GameObject rootObject = new GameObject("Deadcord_RuntimeUI", typeof(RectTransform), typeof(Image));
+        GameObject rootObject = new GameObject("Deadcord_RuntimeUI", typeof(RectTransform), typeof(Image), typeof(CanvasGroup));
         rootObject.transform.SetParent(transform, false);
         _runtimeRoot = rootObject.GetComponent<RectTransform>();
         Stretch(_runtimeRoot, 0f, 0f, 0f, 0f);
@@ -485,7 +474,7 @@ public class DeadcordRuntime : MonoBehaviour
 
         GameObject channelHeading = CreatePanel("ChannelHeading", _mainContent, HexColor(COLOR_BG));
         SetTop(channelHeading.GetComponent<RectTransform>(), 58f, 0f, 0f, 0f);
-        _channelHeaderText = CreateText("ChannelHeadingText", channelHeading.transform, "#  общий", 18, HexColor("#FFFFFF"), TextAnchor.MiddleLeft,
+        _channelHeaderText = CreateText("ChannelHeadingText", channelHeading.transform, "#   общий", 18, HexColor("#FFFFFF"), TextAnchor.MiddleLeft,
             rt => Stretch(rt, 18f, 0f, 18f, 0f), FontStyle.Bold);
         GameObject divider = CreatePanel("HeadingDivider", channelHeading.transform, HexColor("#242529"));
         SetBottom(divider.GetComponent<RectTransform>(), 1f, 0f, 0f, 0f);
@@ -575,8 +564,6 @@ public class DeadcordRuntime : MonoBehaviour
         _commandInput.targetGraphic = inputObject.GetComponent<Image>();
         _commandInput.onEndEdit.AddListener(_ =>
         {
-            // InputField fires onEndEdit both on Enter and on focus loss.
-            // Only treat it as submit when Enter was actually pressed.
             if (Keyboard.current != null &&
                 (Keyboard.current.enterKey.wasPressedThisFrame || Keyboard.current.numpadEnterKey.wasPressedThisFrame))
                 SubmitCommandInput();
@@ -791,8 +778,8 @@ public class DeadcordRuntime : MonoBehaviour
 
         WaveDefinition wave = _waveRules.waves[Mathf.Clamp(_waveIndex, 0, _waveRules.waves.Length - 1)];
         System.Text.StringBuilder builder = new System.Text.StringBuilder();
-        builder.AppendLine("МАНУЛЯТНИК  /  ПАМЯТКА МОДЕРАТОРА");
-        builder.AppendLine("ДЕНЬ 01  •  " + wave.title);
+        builder.AppendLine("МАНУЛЯТНИК   /   ПАМЯТКА МОДЕРАТОРА");
+        builder.AppendLine("ДЕНЬ 01   •   " + wave.title);
         builder.AppendLine();
         builder.AppendLine("ЧТО ДЕЛАТЬ");
         builder.AppendLine();
@@ -801,7 +788,7 @@ public class DeadcordRuntime : MonoBehaviour
         {
             for (int i = 0; i < wave.instructions.Length; i++)
             {
-                builder.Append("•  ");
+                builder.Append("•   ");
                 builder.AppendLine(wave.instructions[i]);
                 builder.AppendLine();
             }
@@ -1023,7 +1010,7 @@ public class DeadcordRuntime : MonoBehaviour
             return;
 
         string command = "/" + incident.requiredAction + " @" + incident.target.username;
-        AddMessage(helperUsername, command, "helper", "💀  +1");
+        AddMessage(helperUsername, command, "helper", "💀   +1");
         ApplyActionToUser(incident.target, incident.requiredAction);
         incident.resolved = true;
         _activeIncident = null;
@@ -1067,7 +1054,7 @@ public class DeadcordRuntime : MonoBehaviour
         string[] parts = input.Split(new[] { ' ', '\t', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length != 2)
         {
-            AddMessage("Вы", input, "player", "💀  -1");
+            AddMessage("Вы", input, "player", "💀   -1");
             AddSystemMessage("Формат команды: /ban @Ник или /mute @Ник");
             ApplyReputationChange(false);
             RefreshStatusUI();
@@ -1085,7 +1072,7 @@ public class DeadcordRuntime : MonoBehaviour
         string targetName = parts[1].Trim().TrimStart('@');
         if (!_usersByName.TryGetValue(targetName, out UserData target))
         {
-            AddMessage("Вы", input, "player", "💀  -1");
+            AddMessage("Вы", input, "player", "💀   -1");
             AddSystemMessage("Пользователь не найден: " + targetName);
             ApplyReputationChange(false);
             RefreshStatusUI();
@@ -1097,12 +1084,12 @@ public class DeadcordRuntime : MonoBehaviour
             if (!target.banned && target.mutedUntil > _shiftElapsed)
             {
                 target.mutedUntil = 0f;
-                AddMessage("Вы", input, "player", "🐸  +1");
+                AddMessage("Вы", input, "player", "🐸   +1");
                 AddSystemMessage(target.username + " снова может писать. Это дополнительная команда прототипа.");
             }
             else
             {
-                AddMessage("Вы", input, "player", "💀  -1");
+                AddMessage("Вы", input, "player", "💀   -1");
                 AddSystemMessage("Этот пользователь сейчас не замучен.");
                 ApplyReputationChange(false);
             }
@@ -1120,14 +1107,14 @@ public class DeadcordRuntime : MonoBehaviour
             ApplyActionToUser(target, action.Substring(1));
             _activeIncident.resolved = true;
             _activeIncident = null;
-            AddMessage("Вы", input, "player", "🐸  +1");
+            AddMessage("Вы", input, "player", "🐸   +1");
             ApplyReputationChange(true);
             AddSystemMessage("Верное решение. Нарушение обработано.");
             RefreshTypingIndicator();
         }
         else
         {
-            AddMessage("Вы", input, "player", "💀  -1");
+            AddMessage("Вы", input, "player", "💀   -1");
             if (_activeIncident == null)
                 AddSystemMessage("Сейчас нет активного нарушения для этой команды.");
             else if (_activeIncident.target != target)
@@ -1156,14 +1143,10 @@ public class DeadcordRuntime : MonoBehaviour
 
     private void ApplyReputationChange(bool success)
     {
-        if (_gameManager != null)
+        if (GameManager.Instance != null)
         {
-            if (success) _gameManager.OnSuccess();
-            else _gameManager.OnError();
-        }
-        else
-        {
-            _localReputation = Mathf.Clamp(_localReputation + (success ? 15f : -15f), 0f, 100f);
+            if (success) GameManager.Instance.OnSuccess();
+            else GameManager.Instance.OnError();
         }
 
         float reputation = CurrentReputation;
@@ -1181,7 +1164,7 @@ public class DeadcordRuntime : MonoBehaviour
 
     private float CurrentReputation
     {
-        get { return _gameManager != null ? _gameManager.reputation : _localReputation; }
+        get { return GameManager.Instance != null ? GameManager.Instance.reputation : 50f; }
     }
 
     #endregion
@@ -1354,14 +1337,9 @@ public class DeadcordRuntime : MonoBehaviour
 
     private void PlayNewMessageSound()
     {
-        // TODO AUDIO: выберите короткий звук уведомления и назначьте его в инспекторе
-        // компонента DeadcordRuntime в поле New Message Sound. Пока клип не назначен,
-        // игра намеренно работает без звука и не выдаёт ошибок.
         if (newMessageSound == null)
             return;
 
-        // TODO AUDIO: здесь воспроизводится звук каждого нового сообщения.
-        // При желании позже добавьте настройки громкости/отдельные звуки для helper/system.
         if (messageAudioSource == null)
         {
             messageAudioSource = GetComponent<AudioSource>();
@@ -1382,7 +1360,7 @@ public class DeadcordRuntime : MonoBehaviour
     {
         _showingModeration = showModeration;
         if (_channelHeaderText != null)
-            _channelHeaderText.text = showModeration ? "#  модерация" : "#  общий";
+            _channelHeaderText.text = showModeration ? "#   модерация" : "#   общий";
         if (_messageScrollObject != null) _messageScrollObject.SetActive(!showModeration);
         if (_typingRowObject != null) _typingRowObject.SetActive(!showModeration && _activeIncident != null && _activeIncident.helperTyping);
         if (_inputRowObject != null) _inputRowObject.SetActive(!showModeration);
@@ -1436,7 +1414,7 @@ public class DeadcordRuntime : MonoBehaviour
         }
 
         if (_headerWaveText != null)
-            _headerWaveText.text = "ДЕНЬ 01  •  ВОЛНА " + CurrentWaveNumber + "/" + Mathf.Max(1, _waveRules.waves.Length) + "  •  " + FormatClock();
+            _headerWaveText.text = "ДЕНЬ 01   •   ВОЛНА " + CurrentWaveNumber + "/" + Mathf.Max(1, _waveRules.waves.Length) + "   •   " + FormatClock();
 
         if (_shiftStatusText != null)
         {
@@ -1508,13 +1486,14 @@ public class DeadcordRuntime : MonoBehaviour
 
     private void CloseDeadcord()
     {
-        if (_gameManager == null)
-            _gameManager = FindObjectOfType<GameManager>();
-
-        if (_gameManager != null)
-            _gameManager.SetMode(GameManager.Mode.Reality);
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.SetMode(GameManager.Mode.Reality);
+        }
         else
+        {
             gameObject.SetActive(false);
+        }
     }
 
     #endregion

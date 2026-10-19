@@ -1,94 +1,127 @@
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.UI; // Обязательно для работы с GraphicRaycaster
+using UnityEngine.SceneManagement;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
+    public static GameManager Instance { get; private set; }
+
     public enum Mode { Reality, Chat }
     public Mode currentMode = Mode.Reality;
-    public GameObject chatPanel;
+    public GameObject chatPanel; // Сюда закинь ChatPanel
 
     [Header("Stats")]
     public float reputation = 50f;
-    public float rhytmInterval = 15f; // секунды между событиями
-    public float minRhytmInterval = 3f; // быстрее не будет
-    public Button toRealityButton;// кнопка, которой выключается чат
 
-    private float timer; // время до следующего события
+    [Header("UI Game Over (TextMeshPro)")]
+    public GameObject gameOverPanel;
+    public TextMeshProUGUI gameOverReasonText;
+
+    [Header("Настройки текстов смерти")]
+    [TextArea(2, 5)]
+    public string dogGameOverText = "ВАС СЪЕЛА СОБАКА!\nВы слишком долго игнорировали потребности питомца.";
+    [TextArea(2, 5)]
+    public string reputationGameOverText = "ВАС УВОЛИЛИ!\nРепутация модератора упала до нуля.";
+    [TextArea(2, 5)]
+    public string winText = "СМЕНА ЗАВЕРШЕНА!\nВы успешно отработали день и получили повышение!";
+
     private bool isGameOver = false;
+
+    void Awake()
+    {
+        if (Instance == null) Instance = this;
+        else { Destroy(gameObject); return; }
+    }
 
     void Start()
     {
+        if (gameOverReasonText == null && gameOverPanel != null)
+        {
+            gameOverReasonText = gameOverPanel.GetComponentInChildren<TextMeshProUGUI>(true);
+        }
+
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(false);
+        }
+
         SetMode(Mode.Reality);
-        toRealityButton.onClick.AddListener(() => SetMode(Mode.Reality));
-        timer = rhytmInterval;
     }
 
-    void Update()
-    {
-        if (isGameOver) return;
-
-        timer -= Time.deltaTime;
-        if (timer < 0)
-        {
-            OnRhythmEvent();
-            timer = rhytmInterval;
-        }
-
-        if (reputation > 75)
-        {
-            rhytmInterval -= Time.deltaTime * 0.03f;
-            rhytmInterval = Mathf.Max(minRhytmInterval, rhytmInterval);
-        }
-
-        HandlePanicVisuals();
-    }
-
-    // Убрать окно дискорда или оставить
     public void SetMode(Mode mode)
     {
+        if (isGameOver) return;
         currentMode = mode;
-        chatPanel.SetActive(mode == Mode.Chat);
+
+        if (chatPanel != null)
+        {
+            // Панель в иерархии ВСЕГДА активна, таймеры и чат идут в фоне!
+            chatPanel.SetActive(true);
+
+            // Ищем корневой элемент интерфейса Deadcord, который мы создали в коде
+            Transform runtimeRoot = chatPanel.transform.Find("Deadcord_RuntimeUI");
+            if (runtimeRoot != null)
+            {
+                CanvasGroup cg = runtimeRoot.GetComponent<CanvasGroup>();
+                if (cg == null) cg = runtimeRoot.gameObject.AddComponent<CanvasGroup>();
+
+                if (mode == Mode.Chat)
+                {
+                    cg.alpha = 1f;
+                    cg.interactable = true;
+                    cg.blocksRaycasts = true;
+                    Cursor.visible = true;
+                    Cursor.lockState = CursorLockMode.None;
+                }
+                else
+                {
+                    cg.alpha = 0f;             // Скрываем с глаз, но чат продолжает жить внутри!
+                    cg.interactable = false;
+                    cg.blocksRaycasts = false; // Мышь летит в игру
+                    Cursor.visible = false;
+                    Cursor.lockState = CursorLockMode.Locked;
+                }
+            }
+        }
     }
 
-    // Игрок допустил ошибку
     public void OnError()
     {
-        reputation -= 15f;
-        Debug.Log($"Репутация: {reputation}");
+        if (isGameOver) return;
+        reputation = Mathf.Clamp(reputation - 15f, 0f, 100f);
         CheckChanges();
     }
 
-    // Игрок сделал всё правильно
     public void OnSuccess()
     {
-        reputation += 15f;
-        Debug.Log($"Репутация: {reputation}");
+        if (isGameOver) return;
+        reputation = Mathf.Clamp(reputation + 15f, 0f, 100f);
         CheckChanges();
     }
 
-    void OnRhythmEvent()
-    {
-        // Здесь могут быть факты о новых сообщениях в чате или события в жизни?
-        Debug.Log("[РИТМ] Пришло новое событие");
-    }
-
-    // Проверка на увольнение
     void CheckChanges()
     {
-        if (reputation <= 0 && !isGameOver)
+        if (reputation <= 0 && !isGameOver) GameOver(reputationGameOverText);
+        else if (reputation >= 100 && !isGameOver) GameOver(winText);
+    }
+
+    public void GameOver(string reason)
+    {
+        isGameOver = true;
+        if (chatPanel != null) chatPanel.SetActive(false);
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+
+        if (gameOverPanel != null)
         {
-            isGameOver = true;
-            Debug.Log("Смена провалена: уволен!");
-        }
-        else if (reputation >= 100 && !isGameOver)
-        {
-            isGameOver = true;
-            Debug.Log("Смена завершена: повышение!");
+            gameOverPanel.SetActive(true);
+            if (gameOverReasonText != null) gameOverReasonText.text = reason;
         }
     }
 
-    void HandlePanicVisuals()
+    public void RestartGame()
     {
-        // Потом можно добавить эффекты
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }

@@ -16,16 +16,18 @@ public class ComputerInteraction : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             canInteract = false;
-            if (chatPanel.activeSelf) chatPanel.SetActive(false);
         }
     }
 
     void Update()
     {
-        if (canInteract && Keyboard.current.eKey.isPressed)
+        // Открываем чат по E, только если мы в зоне и играем в режиме Reality
+        if (canInteract && Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
         {
-            if (chatPanel != null)
-                chatPanel.SetActive(true);
+            if (GameManager.Instance != null && GameManager.Instance.currentMode == GameManager.Mode.Reality)
+            {
+                GameManager.Instance.SetMode(GameManager.Mode.Chat);
+            }
         }
     }
 }
