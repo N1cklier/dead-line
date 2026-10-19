@@ -5,6 +5,7 @@
 /[Bb]uild/
 /[Bb]uilds/
 /Logs/
+/[Uu]ser[Ss]ettings/
 
 # IDE
 .vs/
