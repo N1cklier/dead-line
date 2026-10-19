@@ -1659,6 +1659,7 @@ MonoBehaviour:
   maxStoredMessages: 160
   newMessageSound: {fileID: 0}
   messageAudioSource: {fileID: 0}
+  interfaceFont: {fileID: 12800000, guid: e48aacf34ac6c7241b142eb84f6d9a4e, type: 3}
   hideOldPanelChildren: 1
   helperUsername: DeadcordHelper
 --- !u!1 &1572512012

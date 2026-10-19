@@ -31,6 +31,14 @@ public class DeadcordRuntime : MonoBehaviour
     [Tooltip("Optional AudioSource. If empty and a clip is assigned, one is created automatically.")]
     public AudioSource messageAudioSource;
 
+    [Header("Font")]
+    [Tooltip("Assign a TTF/OTF Font asset with Cyrillic glyphs (for example Noto Sans). Important for WebGL builds.")]
+    [SerializeField] private Font interfaceFont;
+
+    [Header("Text sizing")]
+    [Tooltip("Global multiplier for every Deadcord label. 1.0 = designed defaults; try 1.15–1.3 if text still looks small.")]
+    [SerializeField, Range(0.75f, 2f)] private float fontScale = 1f;
+
     [Header("Interface")]
     [SerializeField] private bool hideOldPanelChildren = true;
     [SerializeField] private string helperUsername = "DeadcordHelper";
@@ -365,9 +373,19 @@ public class DeadcordRuntime : MonoBehaviour
 
     private void FindAssetsAndManagers()
     {
-        _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        // Prefer a font explicitly assigned in the Inspector. Built-in fallback fonts may not
+        // contain Cyrillic glyphs in WebGL builds, so they are only a last-resort fallback.
+        _font = interfaceFont;
         if (_font == null)
-            _font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+        {
+            _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            if (_font == null)
+                _font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+
+            Debug.LogWarning(
+                "[Deadcord] Interface Font is not assigned. Cyrillic characters may be missing in WebGL. " +
+                "Import a Cyrillic TTF/OTF font and assign it to the Interface Font field.", this);
+        }
 
         if (_uiSprite == null)
         {
@@ -414,13 +432,13 @@ public class DeadcordRuntime : MonoBehaviour
         GameObject header = CreatePanel("TopBar", parent, HexColor(COLOR_HEADER));
         SetTop(header.GetComponent<RectTransform>(), 58f, 0f, 0f, 0f);
 
-        CreateText("Brand", header.transform, "DEADCORD   /   Манулятник", 22, HexColor("#FFFFFF"), TextAnchor.MiddleLeft,
+        CreateText("Brand", header.transform, "DEADCORD   /   Манулятник", 36, HexColor("#FFFFFF"), TextAnchor.MiddleLeft,
             rt => Stretch(rt, 20f, 0f, 240f, 0f), FontStyle.Bold);
 
-        _headerWaveText = CreateText("DayWave", header.transform, "ДЕНЬ 01  •  ВОЛНА 1/3", 15, HexColor(COLOR_MUTED), TextAnchor.MiddleRight,
+        _headerWaveText = CreateText("DayWave", header.transform, "ДЕНЬ 01  •  ВОЛНА 1/3", 18, HexColor(COLOR_MUTED), TextAnchor.MiddleRight,
             rt => Stretch(rt, 240f, 0f, 72f, 0f), FontStyle.Bold);
 
-        Button closeButton = CreateButton("CloseButton", header.transform, "×", HexColor("#3F4148"), HexColor("#FFFFFF"), 26,
+        Button closeButton = CreateButton("CloseButton", header.transform, "×", HexColor("#3F4148"), HexColor("#FFFFFF"), 30,
             rt => SetRight(rt, 42f, 8f, 12f, 8f), CloseDeadcord);
     }
 
@@ -434,21 +452,21 @@ public class DeadcordRuntime : MonoBehaviour
         _sidebar.sizeDelta = new Vector2(236f, 0f);
         _sidebar.anchoredPosition = new Vector2(118f, 0f);
 
-        CreateText("ServerTitle", sidebarObject.transform, "МАНУЛЯТНИК", 16, HexColor("#FFFFFF"), TextAnchor.MiddleLeft,
+        CreateText("ServerTitle", sidebarObject.transform, "МАНУЛЯТНИК", 21, HexColor("#FFFFFF"), TextAnchor.MiddleLeft,
             rt => SetTop(rt, 36f, 12f, 14f, 14f), FontStyle.Bold);
-        CreateText("ChannelLabel", sidebarObject.transform, "ТЕКСТОВЫЕ КАНАЛЫ", 10, HexColor(COLOR_MUTED), TextAnchor.MiddleLeft,
+        CreateText("ChannelLabel", sidebarObject.transform, "ТЕКСТОВЫЕ КАНАЛЫ", 13, HexColor(COLOR_MUTED), TextAnchor.MiddleLeft,
             rt => SetTop(rt, 24f, 50f, 14f, 14f), FontStyle.Bold);
 
-        _generalButton = CreateButton("GeneralChannelButton", sidebarObject.transform, "#   общий", HexColor(COLOR_CHANNEL_ACTIVE), HexColor(COLOR_TEXT), 15,
+        _generalButton = CreateButton("GeneralChannelButton", sidebarObject.transform, "#   общий", HexColor(COLOR_CHANNEL_ACTIVE), HexColor(COLOR_TEXT), 18,
             rt => SetTop(rt, 38f, 76f, 10f, 10f), () => SetChannel(false));
-        _moderationButton = CreateButton("ModerationChannelButton", sidebarObject.transform, "#   модерация", HexColor(COLOR_CHANNEL_IDLE), HexColor(COLOR_TEXT), 15,
+        _moderationButton = CreateButton("ModerationChannelButton", sidebarObject.transform, "#   модерация", HexColor(COLOR_CHANNEL_IDLE), HexColor(COLOR_TEXT), 18,
             rt => SetTop(rt, 38f, 118f, 10f, 10f), () => SetChannel(true));
 
         GameObject stats = CreatePanel("ReputationPanel", sidebarObject.transform, HexColor("#232428"));
         SetBottom(stats.GetComponent<RectTransform>(), 168f, 12f, 12f, 12f);
-        CreateText("ReputationLabel", stats.transform, "РЕПУТАЦИЯ", 11, HexColor(COLOR_MUTED), TextAnchor.MiddleLeft,
+        CreateText("ReputationLabel", stats.transform, "РЕПУТАЦИЯ", 13, HexColor(COLOR_MUTED), TextAnchor.MiddleLeft,
             rt => SetTop(rt, 24f, 8f, 10f, 10f), FontStyle.Bold);
-        _reputationText = CreateText("ReputationValue", stats.transform, "50 / 100", 23, HexColor("#FFFFFF"), TextAnchor.MiddleLeft,
+        _reputationText = CreateText("ReputationValue", stats.transform, "50 / 100", 29, HexColor("#FFFFFF"), TextAnchor.MiddleLeft,
             rt => SetTop(rt, 34f, 30f, 10f, 10f), FontStyle.Bold);
 
         GameObject bar = CreatePanel("ReputationBar", stats.transform, HexColor("#404249"));
@@ -461,7 +479,7 @@ public class DeadcordRuntime : MonoBehaviour
         fillRect.offsetMax = Vector2.zero;
         _reputationFill = fill.GetComponent<Image>();
 
-        _shiftStatusText = CreateText("ShiftStatus", stats.transform, "Смена активна", 12, HexColor(COLOR_GREEN), TextAnchor.UpperLeft,
+        _shiftStatusText = CreateText("ShiftStatus", stats.transform, "Смена активна", 15, HexColor(COLOR_GREEN), TextAnchor.UpperLeft,
             rt => Stretch(rt, 10f, 10f, 10f, 88f), FontStyle.Normal);
     }
 
@@ -474,7 +492,7 @@ public class DeadcordRuntime : MonoBehaviour
 
         GameObject channelHeading = CreatePanel("ChannelHeading", _mainContent, HexColor(COLOR_BG));
         SetTop(channelHeading.GetComponent<RectTransform>(), 58f, 0f, 0f, 0f);
-        _channelHeaderText = CreateText("ChannelHeadingText", channelHeading.transform, "#   общий", 18, HexColor("#FFFFFF"), TextAnchor.MiddleLeft,
+        _channelHeaderText = CreateText("ChannelHeadingText", channelHeading.transform, "#   общий", 23, HexColor("#FFFFFF"), TextAnchor.MiddleLeft,
             rt => Stretch(rt, 18f, 0f, 18f, 0f), FontStyle.Bold);
         GameObject divider = CreatePanel("HeadingDivider", channelHeading.transform, HexColor("#242529"));
         SetBottom(divider.GetComponent<RectTransform>(), 1f, 0f, 0f, 0f);
@@ -535,7 +553,7 @@ public class DeadcordRuntime : MonoBehaviour
         GameObject typing = new GameObject("HelperTypingIndicator", typeof(RectTransform));
         typing.transform.SetParent(parent, false);
         SetBottom(typing.GetComponent<RectTransform>(), 22f, 58f, 12f, 12f);
-        _typingText = CreateText("TypingText", typing.transform, "DeadcordHelper печатает...", 12, HexColor(COLOR_MUTED), TextAnchor.MiddleLeft,
+        _typingText = CreateText("TypingText", typing.transform, "DeadcordHelper печатает...", 16, HexColor(COLOR_MUTED), TextAnchor.MiddleLeft,
             rt => Stretch(rt, 0f, 0f, 0f, 0f), FontStyle.Italic);
         _typingRowObject = typing;
         typing.SetActive(false);
@@ -555,7 +573,7 @@ public class DeadcordRuntime : MonoBehaviour
         _commandInput.contentType = InputField.ContentType.Standard;
         _commandInput.shouldHideMobileInput = true;
 
-        Text valueText = CreateText("InputText", inputObject.transform, "", 15, HexColor(COLOR_TEXT), TextAnchor.MiddleLeft,
+        Text valueText = CreateText("InputText", inputObject.transform, "", 19, HexColor(COLOR_TEXT), TextAnchor.MiddleLeft,
             rt => Stretch(rt, 12f, 3f, 12f, 3f), FontStyle.Normal);
         valueText.supportRichText = false;
         valueText.horizontalOverflow = HorizontalWrapMode.Wrap;
@@ -569,12 +587,12 @@ public class DeadcordRuntime : MonoBehaviour
                 SubmitCommandInput();
         });
 
-        Text placeholder = CreateText("Placeholder", inputObject.transform, "Сообщение в #общий или команда /ban @Ник...", 14, HexColor(COLOR_MUTED), TextAnchor.MiddleLeft,
+        Text placeholder = CreateText("Placeholder", inputObject.transform, "Сообщение в #общий или команда /ban @Ник...", 17, HexColor(COLOR_MUTED), TextAnchor.MiddleLeft,
             rt => Stretch(rt, 12f, 3f, 12f, 3f), FontStyle.Italic);
         placeholder.supportRichText = false;
         _commandInput.placeholder = placeholder;
 
-        CreateButton("SendButton", row.transform, "Отправить", HexColor(COLOR_BLUE), HexColor("#FFFFFF"), 14,
+        CreateButton("SendButton", row.transform, "Отправить", HexColor(COLOR_BLUE), HexColor("#FFFFFF"), 17,
             rt => SetRight(rt, 86f, 7f, 7f, 0f), SubmitCommandInput);
         _inputRowObject = row;
     }
@@ -583,7 +601,7 @@ public class DeadcordRuntime : MonoBehaviour
     {
         GameObject rules = CreatePanel("ModerationInstructions", parent, HexColor(COLOR_BG));
         Stretch(rules.GetComponent<RectTransform>(), 20f, 12f, 20f, 66f);
-        _rulesText = CreateText("RulesText", rules.transform, "", 17, HexColor(COLOR_TEXT), TextAnchor.UpperLeft,
+        _rulesText = CreateText("RulesText", rules.transform, "", 20, HexColor(COLOR_TEXT), TextAnchor.UpperLeft,
             rt => Stretch(rt, 0f, 0f, 0f, 0f), FontStyle.Normal);
         _rulesText.horizontalOverflow = HorizontalWrapMode.Wrap;
         _rulesText.verticalOverflow = VerticalWrapMode.Overflow;
@@ -635,7 +653,7 @@ public class DeadcordRuntime : MonoBehaviour
         Text text = go.GetComponent<Text>();
         text.font = _font;
         text.text = value;
-        text.fontSize = fontSize;
+        text.fontSize = Mathf.Max(1, Mathf.RoundToInt(fontSize * Mathf.Clamp(fontScale, 0.75f, 2f)));
         text.color = color;
         text.alignment = alignment;
         text.fontStyle = style;
@@ -1249,7 +1267,7 @@ public class DeadcordRuntime : MonoBehaviour
         avatarImage.sprite = _avatarSprite != null ? _avatarSprite : _uiSprite;
         avatarImage.type = Image.Type.Simple;
         avatarImage.color = ColorForMessage(message, user);
-        Text initials = CreateText("AvatarInitials", avatar.transform, GetInitials(message.username), 12, HexColor("#FFFFFF"), TextAnchor.MiddleCenter,
+        Text initials = CreateText("AvatarInitials", avatar.transform, GetInitials(message.username), 14, HexColor("#FFFFFF"), TextAnchor.MiddleCenter,
             rt => Stretch(rt, 0f, 0f, 0f, 0f), FontStyle.Bold);
 
         GameObject textColumn = new GameObject("MessageTextColumn", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(LayoutElement));
@@ -1266,13 +1284,13 @@ public class DeadcordRuntime : MonoBehaviour
         textLayout.childForceExpandHeight = false;
 
         string nameLine = message.username + "   " + message.timestamp;
-        Text usernameText = CreateText("UsernameAndTime", textColumn.transform, nameLine, 13, ColorForMessage(message, user), TextAnchor.MiddleLeft,
-            rt => rt.sizeDelta = new Vector2(0f, 19f), FontStyle.Bold);
+        Text usernameText = CreateText("UsernameAndTime", textColumn.transform, nameLine, 16, ColorForMessage(message, user), TextAnchor.MiddleLeft,
+            rt => rt.sizeDelta = new Vector2(0f, 24f), FontStyle.Bold);
         LayoutElement usernameLayout = usernameText.gameObject.AddComponent<LayoutElement>();
-        usernameLayout.minHeight = 19f;
-        usernameLayout.preferredHeight = 19f;
+        usernameLayout.minHeight = 24f;
+        usernameLayout.preferredHeight = 24f;
 
-        Text bodyText = CreateText("MessageBody", textColumn.transform, message.text, 15, HexColor(COLOR_TEXT), TextAnchor.UpperLeft,
+        Text bodyText = CreateText("MessageBody", textColumn.transform, message.text, 19, HexColor(COLOR_TEXT), TextAnchor.UpperLeft,
             rt => rt.sizeDelta = new Vector2(0f, 0f), FontStyle.Normal);
         bodyText.supportRichText = false;
         bodyText.horizontalOverflow = HorizontalWrapMode.Wrap;
@@ -1289,7 +1307,7 @@ public class DeadcordRuntime : MonoBehaviour
             reactionElement.minHeight = 24f;
             reactionElement.preferredHeight = 24f;
             reactionElement.preferredWidth = 88f;
-            Text reactionText = CreateText("ReactionText", reaction.transform, message.reaction, 12, HexColor("#DBDEE1"), TextAnchor.MiddleCenter,
+            Text reactionText = CreateText("ReactionText", reaction.transform, message.reaction, 14, HexColor("#DBDEE1"), TextAnchor.MiddleCenter,
                 rt => Stretch(rt, 7f, 1f, 7f, 1f), FontStyle.Bold);
             reactionText.supportRichText = false;
         }
