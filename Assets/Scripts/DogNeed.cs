@@ -8,16 +8,15 @@ public class DogNeed : MonoBehaviour
     public float maxSatiety = 100f;
     public float currentSatiety = 100f;
     public float decreaseRate = 4f;
-    public float feedRate = 35f;
 
     [Header("Пороги")]
     public float warningThreshold = 0.3f;
 
     [Header("UI Ссылки")]
-    public GameObject dogCanvasObject; // UI над собакой (слайдер) — включается только рядом
+    public GameObject dogCanvasObject;
     public Slider satietySlider;
     public Image sliderFillImage;
-    public GameObject warningIcon;    // Значок тревоги на экране/в UI (ВИДЕН ВСЕГДА ПРИ ОПАСНОСТИ)
+    public GameObject warningIcon;
 
     [Header("Цвета")]
     public Color normalColor = Color.green;
@@ -25,6 +24,7 @@ public class DogNeed : MonoBehaviour
     public Color criticalColor = Color.red;
 
     private bool isPlayerInTrigger = false;
+    private PlayerHunger playerHunger;
 
     void Start()
     {
@@ -40,10 +40,14 @@ public class DogNeed : MonoBehaviour
         currentSatiety -= decreaseRate * Time.deltaTime;
         currentSatiety = Mathf.Clamp(currentSatiety, 0f, maxSatiety);
 
-        // 2. Кормление на E рядом с собакой
-        if (isPlayerInTrigger && Keyboard.current != null && Keyboard.current.eKey.isPressed)
+        // 2. Кормление собаки: если игрок рядом, в руке есть мясо и нажата E
+        if (isPlayerInTrigger && Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
         {
-            currentSatiety = Mathf.Min(maxSatiety, currentSatiety + feedRate * Time.deltaTime);
+            if (playerHunger != null && playerHunger.hasMeatInHand)
+            {
+                currentSatiety = maxSatiety; // Полностью восстанавливаем сытость пса
+                playerHunger.hasMeatInHand = false; // Тратим мясо из руки
+            }
         }
 
         // 3. Геймовер: собака съела игрока
@@ -57,13 +61,11 @@ public class DogNeed : MonoBehaviour
             return;
         }
 
-        // 4. Полоска обновляется только если мы рядом
         if (isPlayerInTrigger)
         {
             UpdateUI();
         }
 
-        // 5. ГЛОБАЛЬНАЯ ТРЕВОГА: видна везде, если сытость меньше 30%
         HandleGlobalWarning();
     }
 
@@ -72,6 +74,7 @@ public class DogNeed : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             isPlayerInTrigger = true;
+            playerHunger = other.GetComponent<PlayerHunger>();
             if (dogCanvasObject != null) dogCanvasObject.SetActive(true);
             UpdateUI();
         }
@@ -82,6 +85,7 @@ public class DogNeed : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             isPlayerInTrigger = false;
+            playerHunger = null;
             if (dogCanvasObject != null) dogCanvasObject.SetActive(false);
         }
     }
@@ -113,7 +117,6 @@ public class DogNeed : MonoBehaviour
 
         if (warningIcon != null)
         {
-            // Показываем иконку независимо от того, где находится игрок!
             warningIcon.SetActive(isCritical);
 
             if (isCritical)

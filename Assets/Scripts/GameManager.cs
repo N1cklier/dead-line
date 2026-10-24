@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.UI; // Обязательно для работы с GraphicRaycaster
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
 
@@ -9,7 +9,7 @@ public class GameManager : MonoBehaviour
 
     public enum Mode { Reality, Chat }
     public Mode currentMode = Mode.Reality;
-    public GameObject chatPanel; // Сюда закинь ChatPanel
+    public GameObject chatPanel;
 
     [Header("Stats")]
     public float reputation = 50f;
@@ -56,10 +56,8 @@ public class GameManager : MonoBehaviour
 
         if (chatPanel != null)
         {
-            // Панель в иерархии ВСЕГДА активна, таймеры и чат идут в фоне!
             chatPanel.SetActive(true);
 
-            // Ищем корневой элемент интерфейса Deadcord, который мы создали в коде
             Transform runtimeRoot = chatPanel.transform.Find("Deadcord_RuntimeUI");
             if (runtimeRoot != null)
             {
@@ -76,9 +74,9 @@ public class GameManager : MonoBehaviour
                 }
                 else
                 {
-                    cg.alpha = 0f;             // Скрываем с глаз, но чат продолжает жить внутри!
+                    cg.alpha = 0f;
                     cg.interactable = false;
-                    cg.blocksRaycasts = false; // Мышь летит в игру
+                    cg.blocksRaycasts = false;
                     Cursor.visible = false;
                     Cursor.lockState = CursorLockMode.Locked;
                 }

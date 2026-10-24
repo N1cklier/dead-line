@@ -21,7 +21,6 @@ public class ComputerInteraction : MonoBehaviour
 
     void Update()
     {
-        // Открываем чат по E, только если мы в зоне и играем в режиме Reality
         if (canInteract && Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
         {
             if (GameManager.Instance != null && GameManager.Instance.currentMode == GameManager.Mode.Reality)
