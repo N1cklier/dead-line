@@ -83,7 +83,7 @@ public partial class DeadcordRuntime
             Mathf.Max(npcMessageIntervalMin + 0.1f, npcMessageIntervalMax)) * npcMessageIntervalMultiplier;
         UserData speaker = PickActiveUser();
 
-        if (_shiftElapsed >= 20f && _activeIncident == null && UnityEngine.Random.value < violationChance)
+        if (_shiftElapsed >= 20f && _activeIncidents.Count == 0 && UnityEngine.Random.value < violationChance)
         {
             List<ViolationDefinition> available = GetAvailableViolations();
             if (available.Count > 0)
@@ -91,7 +91,7 @@ public partial class DeadcordRuntime
                 ViolationDefinition selected = available[UnityEngine.Random.Range(0, available.Count)];
                 string violationText = Pick(selected.messages, "Нарушение правил");
                 AddMessage(speaker.username, violationText, "npc");
-                StartIncident(speaker, selected, violationText);
+                StartIncident(speaker, selected, violationText, false);
                 return;
             }
         }
@@ -136,14 +136,17 @@ public partial class DeadcordRuntime
         return false;
     }
 
-    private void StartIncident(UserData target, ViolationDefinition definition, string sourceText)
+    private void StartIncident(UserData target, ViolationDefinition definition, string sourceText, bool forceStory = false)
     {
-        if (target == null || definition == null || _activeIncident != null || target.banned || !IsCategoryUnlocked(definition.category))
+        if (target == null || definition == null || target.banned)
+            return;
+
+        if (!forceStory && (_activeIncidents.Count > 0 || !IsCategoryUnlocked(definition.category)))
             return;
 
         float delay = helperDeadlineBaseSeconds + UnityEngine.Random.Range(-helperDeadlineVarianceSeconds, helperDeadlineVarianceSeconds);
         delay = Mathf.Max(1f, delay);
-        _activeIncident = new IncidentData
+        _activeIncidents.Add(new IncidentData
         {
             id = ++_incidentSequence,
             target = target,
@@ -154,39 +157,57 @@ public partial class DeadcordRuntime
             deadlineAt = _shiftElapsed + delay,
             helperSendAt = -1f,
             originalText = sourceText
-        };
+        });
         RefreshTypingIndicator();
     }
 
     private void UpdateIncidentTimer()
     {
-        if (_activeIncident == null || _activeIncident.resolved)
+        if (_activeIncidents.Count == 0)
         {
             RefreshTypingIndicator();
             return;
         }
 
-        if (!_activeIncident.helperTyping && _shiftElapsed >= _activeIncident.deadlineAt - helperTypingSeconds)
+        bool stateChanged = false;
+        for (int i = _activeIncidents.Count - 1; i >= 0; i--)
         {
-            _activeIncident.helperTyping = true;
-            _activeIncident.helperSendAt = _activeIncident.deadlineAt;
-            RefreshTypingIndicator();
+            IncidentData incident = _activeIncidents[i];
+            if (incident == null || incident.resolved)
+            {
+                _activeIncidents.RemoveAt(i);
+                stateChanged = true;
+                continue;
+            }
+
+            if (!incident.helperTyping && _shiftElapsed >= incident.deadlineAt - helperTypingSeconds)
+            {
+                incident.helperTyping = true;
+                incident.helperSendAt = incident.deadlineAt;
+                stateChanged = true;
+            }
+
+            if (incident.helperTyping && _shiftElapsed >= incident.helperSendAt)
+            {
+                HelperResolveIncident(incident);
+                stateChanged = true;
+            }
         }
 
-        if (_activeIncident != null && _activeIncident.helperTyping && _shiftElapsed >= _activeIncident.helperSendAt)
-            HelperResolveIncident(_activeIncident);
+        if (stateChanged)
+            RefreshTypingIndicator();
     }
 
     private void HelperResolveIncident(IncidentData incident)
     {
-        if (incident == null || incident.resolved || _activeIncident == null || incident.id != _activeIncident.id)
+        if (incident == null || incident.resolved)
             return;
 
         string command = "/" + incident.requiredAction + " @" + incident.target.username;
         AddMessage(helperUsername, command, "helper", "💀   +1");
         ApplyActionToUser(incident.target, incident.requiredAction);
         incident.resolved = true;
-        _activeIncident = null;
+        _activeIncidents.Remove(incident);
         ApplyReputationChange(false);
         RefreshTypingIndicator();
         AddSystemMessage("Помощник перехватил нарушение. Репутация снижена.");

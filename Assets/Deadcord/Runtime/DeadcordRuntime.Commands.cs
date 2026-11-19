@@ -83,16 +83,32 @@ public partial class DeadcordRuntime
             return;
         }
 
-        bool correctIncident = _activeIncident != null
-            && !_activeIncident.resolved
-            && _activeIncident.target == target
-            && string.Equals(_activeIncident.requiredAction, action.Substring(1), StringComparison.OrdinalIgnoreCase);
+        string cleanAction = action.Substring(1);
+        IncidentData matchedIncident = null;
+        IncidentData wrongActionForTarget = null;
 
-        if (correctIncident)
+        for (int i = 0; i < _activeIncidents.Count; i++)
         {
-            ApplyActionToUser(target, action.Substring(1));
-            _activeIncident.resolved = true;
-            _activeIncident = null;
+            IncidentData inc = _activeIncidents[i];
+            if (inc == null || inc.resolved)
+                continue;
+
+            if (inc.target == target)
+            {
+                if (string.Equals(inc.requiredAction, cleanAction, StringComparison.OrdinalIgnoreCase))
+                {
+                    matchedIncident = inc;
+                    break;
+                }
+                wrongActionForTarget = inc;
+            }
+        }
+
+        if (matchedIncident != null)
+        {
+            ApplyActionToUser(target, cleanAction);
+            matchedIncident.resolved = true;
+            _activeIncidents.Remove(matchedIncident);
             AddMessage("Вы", input, "player", "🐸   +1");
             ApplyReputationChange(true);
             AddSystemMessage("Верное решение. Нарушение обработано.");
@@ -101,12 +117,12 @@ public partial class DeadcordRuntime
         else
         {
             AddMessage("Вы", input, "player", "💀   -1");
-            if (_activeIncident == null)
+            if (_activeIncidents.Count == 0)
                 AddSystemMessage("Сейчас нет активного нарушения для этой команды.");
-            else if (_activeIncident.target != target)
-                AddSystemMessage("Неверная цель. Проверьте ник активного нарушителя в #общий.");
+            else if (wrongActionForTarget != null)
+                AddSystemMessage("Неверное действие. Для этого нарушения требуется /" + wrongActionForTarget.requiredAction + ".");
             else
-                AddSystemMessage("Неверное действие. Для этого нарушения требуется /" + _activeIncident.requiredAction + ".");
+                AddSystemMessage("Неверная цель. Проверьте ник активного нарушителя в #общий.");
             ApplyReputationChange(false);
         }
 

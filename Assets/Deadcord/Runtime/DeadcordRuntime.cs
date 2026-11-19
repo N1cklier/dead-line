@@ -99,7 +99,7 @@ public partial class DeadcordRuntime : MonoBehaviour
     private readonly Dictionary<string, UserData> _usersByName = new Dictionary<string, UserData>(StringComparer.OrdinalIgnoreCase);
     private readonly HashSet<string> _usedNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
     private readonly List<ChatMessage> _messages = new List<ChatMessage>();
-    private IncidentData _activeIncident;
+    private readonly List<IncidentData> _activeIncidents = new List<IncidentData>();
 
     private readonly Color[] _avatarColors =
     {

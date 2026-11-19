@@ -19,7 +19,8 @@ public partial class DeadcordRuntime
         if (_channelHeaderText != null)
             _channelHeaderText.text = showModeration ? "#   модерация" : "#   общий";
         if (_messageScrollObject != null) _messageScrollObject.SetActive(!showModeration);
-        if (_typingRowObject != null) _typingRowObject.SetActive(!showModeration && _activeIncident != null && _activeIncident.helperTyping);
+        bool anyHelperTyping = _activeIncidents.Exists(inc => inc != null && !inc.resolved && inc.helperTyping);
+        if (_typingRowObject != null) _typingRowObject.SetActive(!showModeration && anyHelperTyping);
         if (_inputRowObject != null) _inputRowObject.SetActive(!showModeration);
         if (_rulesPanelObject != null) _rulesPanelObject.SetActive(showModeration);
 
@@ -48,7 +49,7 @@ public partial class DeadcordRuntime
     private void RefreshTypingIndicator()
     {
         if (_typingRowObject == null) return;
-        bool shouldShow = !_showingModeration && _activeIncident != null && _activeIncident.helperTyping && !_activeIncident.resolved;
+        bool shouldShow = !_showingModeration && _activeIncidents.Exists(inc => inc != null && !inc.resolved && inc.helperTyping);
         _typingRowObject.SetActive(shouldShow);
         if (_typingText != null)
             _typingText.text = helperUsername + " печатает...";
@@ -95,9 +96,12 @@ public partial class DeadcordRuntime
                 _shiftStatusText.text = "СМЕНА ЗАВЕРШЕНА";
                 _shiftStatusText.color = HexColor(COLOR_MUTED);
             }
-            else if (_activeIncident != null)
+            else if (_activeIncidents.Count > 0)
             {
-                _shiftStatusText.text = _activeIncident.helperTyping ? "Помощник печатает" : "Есть активное нарушение";
+                bool anyTyping = _activeIncidents.Exists(inc => inc != null && !inc.resolved && inc.helperTyping);
+                _shiftStatusText.text = anyTyping
+                    ? "Помощник печатает"
+                    : (_activeIncidents.Count > 1 ? "Активных нарушений: " + _activeIncidents.Count : "Есть активное нарушение");
                 _shiftStatusText.color = HexColor(COLOR_GOLD);
             }
             else

@@ -20,7 +20,7 @@ public partial class DeadcordRuntime
         _nextStoryIndex = 0;
         _nextNpcMessageAt = float.PositiveInfinity;
         _nextWaveAt = float.PositiveInfinity;
-        _activeIncident = null;
+        _activeIncidents.Clear();
         GenerateInitialUsers(10);
         RefreshInstructions();
         RefreshStatusUI();
@@ -138,14 +138,25 @@ public partial class DeadcordRuntime
             if (!string.IsNullOrWhiteSpace(storyEvent.incidentCategory))
             {
                 ViolationDefinition definition = FindViolationByCategory(storyEvent.incidentCategory);
-                if (definition == null || !IsCategoryUnlocked(definition.category) || _activeIncident != null)
+                if (definition == null)
                     continue;
 
-                UserData offender = GetOrCreateUser(GenerateUsername());
-                string randomViolationText = Pick(definition.messages,
-                    string.IsNullOrWhiteSpace(storyEvent.text) ? "Нарушение правил" : storyEvent.text);
-                AddMessage(offender.username, randomViolationText, "npc");
-                StartIncident(offender, definition, randomViolationText);
+                bool isCustomStoryIncident = !string.IsNullOrWhiteSpace(storyEvent.username) && !string.IsNullOrWhiteSpace(storyEvent.text);
+                if (!isCustomStoryIncident && !IsCategoryUnlocked(definition.category))
+                    continue;
+
+                string offenderName = !string.IsNullOrWhiteSpace(storyEvent.username)
+                    ? storyEvent.username
+                    : GenerateUsername();
+
+                UserData offender = GetOrCreateUser(offenderName);
+
+                string violationText = !string.IsNullOrWhiteSpace(storyEvent.text)
+                    ? storyEvent.text
+                    : Pick(definition.messages, "Нарушение правил");
+
+                AddMessage(offender.username, violationText, "npc");
+                StartIncident(offender, definition, violationText, true);
                 continue;
             }
 
