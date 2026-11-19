@@ -44,7 +44,6 @@ public partial class DeadcordRuntime
         if (_acceptRulesButton != null)
             _acceptRulesButton.gameObject.SetActive(false);
 
-        // Switch first, so opening messages render in #общий and get normal notification behavior.
         SetChannel(false);
         AddSystemMessage("✅ Вы приняли правила модерации. Смена 01 началась.");
         AddSystemMessage("Все сообщения пользователей идут в #общий. В #модерация находятся только инструкции.");
@@ -130,15 +129,12 @@ public partial class DeadcordRuntime
         if (!_shiftAccepted || _story == null || _story.events == null)
             return;
 
-        // Scale authored story event timestamps as well as random chat intervals.
         while (_nextStoryIndex < _story.events.Length && _story.events[_nextStoryIndex].atSeconds * npcMessageIntervalMultiplier <= _shiftElapsed)
         {
             StoryEvent storyEvent = _story.events[_nextStoryIndex++];
             if (storyEvent == null)
                 continue;
 
-            // A story incident is a template, not a fixed NPC. Never use the hard-coded username/text
-            // from Day01Story.json for violations; create a fresh random user and pick from Violations.json.
             if (!string.IsNullOrWhiteSpace(storyEvent.incidentCategory))
             {
                 ViolationDefinition definition = FindViolationByCategory(storyEvent.incidentCategory);

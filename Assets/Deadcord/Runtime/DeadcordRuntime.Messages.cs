@@ -72,7 +72,7 @@ public partial class DeadcordRuntime
         rowFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
         LayoutElement rowElement = row.AddComponent<LayoutElement>();
-        rowElement.minHeight = 42f;
+        rowElement.minHeight = 75f;
 
         UserData user = (message.role == "system" || message.role == "player" || message.role == "helper")
             ? null
@@ -80,18 +80,15 @@ public partial class DeadcordRuntime
         GameObject avatar = new GameObject("Avatar", typeof(RectTransform), typeof(Image), typeof(LayoutElement));
         avatar.transform.SetParent(row.transform, false);
         LayoutElement avatarElement = avatar.GetComponent<LayoutElement>();
-        avatarElement.minWidth = 38f;
-        avatarElement.preferredWidth = 38f;
-        avatarElement.flexibleWidth = 0f;
-        avatarElement.minHeight = 38f;
-        avatarElement.preferredHeight = 38f;
-        avatarElement.flexibleHeight = 0f;
-        avatar.GetComponent<RectTransform>().sizeDelta = new Vector2(38f, 38f);
+        avatarElement.minWidth = avatarElement.minHeight = 75f;
+        avatarElement.preferredWidth = avatarElement.preferredHeight = 75f;
+        avatarElement.flexibleWidth = avatarElement.flexibleHeight = 0f;
+        avatar.GetComponent<RectTransform>().sizeDelta = new Vector2(75f, 75f);
         Image avatarImage = avatar.GetComponent<Image>();
         avatarImage.sprite = _avatarSprite != null ? _avatarSprite : _uiSprite;
         avatarImage.type = Image.Type.Simple;
         avatarImage.color = ColorForMessage(message, user);
-        Text initials = CreateText("AvatarInitials", avatar.transform, GetInitials(message.username), 14, HexColor("#FFFFFF"), TextAnchor.MiddleCenter,
+        Text initials = CreateText("AvatarInitials", avatar.transform, GetInitials(message.username), 20, HexColor("#FFFFFF"), TextAnchor.MiddleCenter,
             rt => Stretch(rt, 0f, 0f, 0f, 0f), FontStyle.Bold);
 
         GameObject textColumn = new GameObject("MessageTextColumn", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(LayoutElement));
@@ -108,13 +105,12 @@ public partial class DeadcordRuntime
         textLayout.childForceExpandHeight = false;
 
         string nameLine = message.username + "   " + message.timestamp;
-        Text usernameText = CreateText("UsernameAndTime", textColumn.transform, nameLine, 16, ColorForMessage(message, user), TextAnchor.MiddleLeft,
-            rt => rt.sizeDelta = new Vector2(0f, 24f), FontStyle.Bold);
+        Text usernameText = CreateText("UsernameAndTime", textColumn.transform, nameLine, 20, ColorForMessage(message, user), TextAnchor.MiddleLeft,
+            rt => rt.sizeDelta = new Vector2(0f, 30f), FontStyle.Bold);
         LayoutElement usernameLayout = usernameText.gameObject.AddComponent<LayoutElement>();
-        usernameLayout.minHeight = 24f;
-        usernameLayout.preferredHeight = 24f;
+        usernameLayout.minHeight = usernameLayout.preferredHeight = 30f;
 
-        Text bodyText = CreateText("MessageBody", textColumn.transform, message.text, 19, HexColor(COLOR_TEXT), TextAnchor.UpperLeft,
+        Text bodyText = CreateText("MessageBody", textColumn.transform, message.text, 24, HexColor(COLOR_TEXT), TextAnchor.UpperLeft,
             rt => rt.sizeDelta = new Vector2(0f, 0f), FontStyle.Normal);
         bodyText.supportRichText = false;
         bodyText.horizontalOverflow = HorizontalWrapMode.Wrap;
@@ -128,10 +124,9 @@ public partial class DeadcordRuntime
         {
             GameObject reaction = CreatePanel("ReactionChip", textColumn.transform, HexColor("#383A40"));
             LayoutElement reactionElement = reaction.AddComponent<LayoutElement>();
-            reactionElement.minHeight = 24f;
-            reactionElement.preferredHeight = 24f;
+            reactionElement.minHeight = reactionElement.preferredHeight = 28f;
             reactionElement.preferredWidth = 88f;
-            Text reactionText = CreateText("ReactionText", reaction.transform, message.reaction, 14, HexColor("#DBDEE1"), TextAnchor.MiddleCenter,
+            Text reactionText = CreateText("ReactionText", reaction.transform, message.reaction, 18, HexColor("#DBDEE1"), TextAnchor.MiddleCenter,
                 rt => Stretch(rt, 7f, 1f, 7f, 1f), FontStyle.Bold);
             reactionText.supportRichText = false;
         }

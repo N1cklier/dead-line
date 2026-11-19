@@ -12,7 +12,6 @@ public partial class DeadcordRuntime
 
     private void SetChannel(bool showModeration)
     {
-        // #общий cannot be opened until the acceptance reaction starts the shift.
         if (!showModeration && !_shiftAccepted)
             showModeration = true;
 

@@ -6,25 +6,19 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
-/// <summary>
-/// Deadcord v0.1.3 runtime. UI and game logic are split into partial source files.
-/// Attach this component to the same GameObject referenced by ComputerInteraction.chatPanel.
-/// It builds its UI at runtime and optionally calls the existing GameManager.OnSuccess/OnError.
-/// </summary>
 public partial class DeadcordRuntime : MonoBehaviour
 {
     [Header("Data (JSON files live under Assets/Deadcord/Resources/DeadcordData)")]
     [SerializeField] private string dataFolder = "DeadcordData";
 
     [Header("NPC timing")]
-    [SerializeField, Min(0.5f)] private float npcMessageIntervalMin = 3.5f;
-    [SerializeField, Min(1f)] private float npcMessageIntervalMax = 5.5f;
-    [SerializeField, Range(1f, 2.5f)] private float npcMessageIntervalMultiplier = 1.5f;
+    [SerializeField, Min(0.5f)] private float npcMessageIntervalMin = 2.1f;
+    [SerializeField, Min(1f)] private float npcMessageIntervalMax = 3.5f;
+    [SerializeField, Range(1f, 2.5f)] private float npcMessageIntervalMultiplier = 1.2f;
     [SerializeField, Range(0f, 1f)] private float violationChance = 0.42f;
-    // Renamed from helperDelaySeconds so existing Inspector values of 15 seconds do not override the new default.
-    [SerializeField, Min(17f)] private float helperDeadlineBaseSeconds = 22f;
+    [SerializeField, Min(17f)] private float helperDeadlineBaseSeconds = 20f;
     [SerializeField, Min(0f)] private float helperDeadlineVarianceSeconds = 5f;
-    [SerializeField, Min(0.1f)] private float helperTypingSeconds = 1.4f;
+    [SerializeField, Min(0.1f)] private float helperTypingSeconds = 9.5f;
     [SerializeField, Min(20f)] private float maxStoredMessages = 160f;
 
     [Header("Audio - optional; leave empty until a sound is chosen")]
@@ -149,7 +143,6 @@ public partial class DeadcordRuntime : MonoBehaviour
         if (!_shiftStarted)
             BeginShift();
 
-        // The first thing the player sees is the moderation channel.
         SetChannel(true);
     }
 
@@ -165,8 +158,7 @@ public partial class DeadcordRuntime : MonoBehaviour
             return;
         }
 
-        // Do not let story, NPCs, wave changes, or helper deadlines start until the rules reaction is clicked.
-        if (!_shiftAccepted)
+        if (!_shiftAccepted)// без подтверждения смена не начнётся
         {
             if (inChatMode)
                 RefreshStatusUI();
@@ -341,73 +333,6 @@ public partial class DeadcordRuntime : MonoBehaviour
         _violations = LoadJson<ViolationsData>("Violations");
         _waveRules = LoadJson<WaveRulesData>("Day01Rules");
         _story = LoadJson<StoryData>("Day01Story");
-
-        if (_nameParts == null || _nameParts.first == null || _nameParts.first.Length == 0)
-        {
-            _nameParts = new NamePartsData
-            {
-                first = new[] { "Penis", "Giga", "Mega", "Sigma", "Vasya" },
-                second = new[] { "Titov", "Bober", "Nuub", "Hren", "Kaban" },
-                third = new[] { "67", "_228", "-Xx", "#1337", "_lol" }
-            };
-        }
-
-        if (_normalMessages == null || _normalMessages.messages == null || _normalMessages.messages.Length == 0)
-        {
-            _normalMessages = new NormalMessagesData
-            {
-                messages = new[]
-                {
-                    "Кто сегодня отвечает за музыку?",
-                    "доброе утро чат",
-                    "а где закреп с правилами",
-                    "у кого-нибудь тоже лагает?",
-                    "я на минуту отошёл",
-                    "почему тут так тихо",
-                    "кто-нибудь видел объявление начальника?",
-                    "ладно, вернусь позже"
-                }
-            };
-        }
-
-        if (_violations == null || _violations.incidents == null || _violations.incidents.Length == 0)
-        {
-            _violations = new ViolationsData
-            {
-                incidents = new[]
-                {
-                    new ViolationDefinition { id = "insult", category = "insult", minWave = 1, requiredAction = "ban", messages = new[] { "Ты тупой кретин", "Админ лох и ничего не умеет", "Заткнись, жалкий идиот" } },
-                    new ViolationDefinition { id = "laughter", category = "laughter", minWave = 2, requiredAction = "ban", messages = new[] { "АХАХАХАХАХАХАХА", "ХАХАХАХАХАХАХА", "АХАХАХА СИКС СЕВЕН" } },
-                    new ViolationDefinition { id = "caps", category = "caps", minWave = 3, requiredAction = "ban", messages = new[] { "ПИСЬКА СИКС СЕВЕН", "ВСЕ СЮДА СРОЧНО", "Я СЕЙЧАС ВСЁ ВАМ ОБЪЯСНЮ" } }
-                }
-            };
-        }
-
-        if (_waveRules == null || _waveRules.waves == null || _waveRules.waves.Length == 0)
-        {
-            _waveRules = new WaveRulesData
-            {
-                waves = new[]
-                {
-                    new WaveDefinition { wave = 1, title = "Волна 1/3 — оскорбления", durationSeconds = 45f, announcement = "Волна 1. Баньте оскорбления.", instructions = new[] { "БАН: прямые оскорбления и травля.", "АХАХ-спам пока разрешён.", "КАПС ПОКА РАЗРЕШЁН." }, unlockedCategories = new[] { "insult" } },
-                    new WaveDefinition { wave = 2, title = "Волна 2/3 — оскорбления и смехоспам", durationSeconds = 45f, announcement = "Волна 2. Теперь также баньте спам из повторяющегося «АХАХА». Правила первой волны остаются.", instructions = new[] { "БАН: оскорбления и травля.", "БАН: повторяющийся спам «АХАХА/ХАХАХА».", "КАПС ПОКА РАЗРЕШЁН." }, unlockedCategories = new[] { "insult", "laughter" } },
-                    new WaveDefinition { wave = 3, title = "Волна 3/3 — добавляется капс", durationSeconds = 999999f, announcement = "Волна 3. Теперь баньте также сообщения, написанные ЦЕЛИКОМ КАПСОМ.", instructions = new[] { "БАН: оскорбления и травля.", "БАН: повторяющийся спам «АХАХА/ХАХАХА».", "БАН: сообщения, написанные ЦЕЛИКОМ ЗАГЛАВНЫМИ БУКВАМИ (кроме коротких аббревиатур)." }, unlockedCategories = new[] { "insult", "laughter", "caps" } }
-                }
-            };
-        }
-
-        if (_story == null || _story.events == null)
-        {
-            _story = new StoryData
-            {
-                events = new[]
-                {
-                    new StoryEvent { atSeconds = 1f, speakerKey = "boss", username = "StarshiyMod", text = "Добро пожаловать на смену. Правила смотрите в #модерация." },
-                    new StoryEvent { atSeconds = 5f, speakerKey = "coworker", username = "Bober_Staff", text = "Главное — не пропускай нарушения, начальник сегодня злой." },
-                    new StoryEvent { atSeconds = 13f, speakerKey = "plot_user_01", username = "VasyaKaban_228", text = "Ты тупой кретин, модератор", incidentCategory = "insult" }
-                }
-            };
-        }
     }
 
     #endregion

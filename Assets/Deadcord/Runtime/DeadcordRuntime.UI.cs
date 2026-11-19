@@ -16,8 +16,6 @@ public partial class DeadcordRuntime
         if (_playerHunger == null)
             Debug.LogWarning("[Deadcord] PlayerHunger не найден: шкала голода и иконка мяса не будут скрываться автоматически.", this);
 
-        // Prefer a font explicitly assigned in the Inspector. Built-in fallback fonts may not
-        // contain Cyrillic glyphs in WebGL builds, so they are only a last-resort fallback.
         _font = interfaceFont;
         if (_font == null)
         {
@@ -48,7 +46,6 @@ public partial class DeadcordRuntime
 
     private void BuildInterface()
     {
-        // Убираем выключение детей через SetActive, чтобы объект панели всегда оставался активным для фона!
         EnsureEventSystem();
 
         GameObject rootObject = new GameObject("Deadcord_RuntimeUI", typeof(RectTransform), typeof(Image), typeof(CanvasGroup));
@@ -249,7 +246,6 @@ public partial class DeadcordRuntime
         _rulesText.horizontalOverflow = HorizontalWrapMode.Wrap;
         _rulesText.verticalOverflow = VerticalWrapMode.Overflow;
 
-        // Styled as an emoji reaction, not a separate channel/message.
         _acceptRulesButton = CreateButton("AcceptRulesReaction", rules.transform, "✅  ПРИНЯТЬ ПРАВИЛА",
             HexColor("#248046"), HexColor("#FFFFFF"), 18,
             rt => SetBottom(rt, 44f, 10f, 10f, 10f), AcceptRulesReaction);
