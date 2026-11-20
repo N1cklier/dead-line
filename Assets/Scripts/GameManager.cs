@@ -13,6 +13,12 @@ public class GameManager : MonoBehaviour
 
     [Header("Stats")]
     public float reputation = 50f;
+    public bool HasShiftStarted {get; private set;}
+    public bool IsGameOver {get {return isGameOver;} }
+    public void MarkShiftStarted()
+    {
+        HasShiftStarted = true;
+    }
 
     [Header("UI Game Over (TextMeshPro)")]
     public GameObject gameOverPanel;
@@ -106,6 +112,8 @@ public class GameManager : MonoBehaviour
 
     public void GameOver(string reason)
     {
+        if (isGameOver)
+            return;
         isGameOver = true;
         if (chatPanel != null) chatPanel.SetActive(false);
         Cursor.visible = true;

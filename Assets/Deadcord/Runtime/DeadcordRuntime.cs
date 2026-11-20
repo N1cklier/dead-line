@@ -82,6 +82,7 @@ public partial class DeadcordRuntime : MonoBehaviour
     private float _nextPlayerHungerSearchAt;
     private bool _playerHungerSliderWasActive;
     private bool _meatIconWasActive;
+    private bool _satietyIconWasActive;
     private float _shiftElapsed;
     private float _nextNpcMessageAt;
     private float _nextWaveAt;
@@ -158,6 +159,9 @@ public partial class DeadcordRuntime : MonoBehaviour
             return;
         }
 
+        if (_shiftEnded)
+            return;
+
         if (!_shiftAccepted)// без подтверждения смена не начнётся
         {
             if (inChatMode)
@@ -166,6 +170,11 @@ public partial class DeadcordRuntime : MonoBehaviour
         }
 
         _shiftElapsed += Time.unscaledDeltaTime;
+        if (_shiftElapsed >= GetShiftDurationSeconds())
+        {
+            CompleteShift();
+            return;
+        }
         AdvanceWaves();
         PlayStoryEvents();
         SpawnNpcMessageIfDue();

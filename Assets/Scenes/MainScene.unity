@@ -1249,7 +1249,7 @@ Transform:
   m_GameObject: {fileID: 690506754}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.93941, z: 0}
+  m_LocalPosition: {x: -2, y: 0.93941, z: -4}
   m_LocalScale: {x: 1, y: 2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1291,12 +1291,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHunger
   maxSatiety: 100
   currentSatiety: 100
-  decreaseRate: 2.5
+  startingSatietyPercent: 0.5
+  decreaseRate: 0.42
   feedSelfRate: 35
   hasMeatInHand: 0
   playerSatietySlider: {fileID: 655046704}
   playerSliderFillImage: {fileID: 1350190213}
   meatIconInHand: {fileID: 1495029911}
+  satietyIcon: {fileID: 1390094069}
   normalColor: {r: 0, g: 1, b: 0, a: 1}
   warningColor: {r: 1, g: 0.5, b: 0, a: 1}
   criticalColor: {r: 1, g: 0, b: 0, a: 1}
@@ -1902,8 +1904,7 @@ GameObject:
   - component: {fileID: 1390094072}
   - component: {fileID: 1390094071}
   m_Layer: 0
-  m_Name: "\u0421\u043D\u0438\u043C\u043E\u043A \u044D\u043A\u0440\u0430\u043D\u0430
-    2026-10-24 183454"
+  m_Name: "PlayerHungerIcon (\u0441\u043D\u0438\u043C\u043E\u043A \u044D\u043A\u0440\u0430\u043D\u0430))))"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2156,8 +2157,7 @@ GameObject:
   - component: {fileID: 1495029914}
   - component: {fileID: 1495029913}
   m_Layer: 0
-  m_Name: "\u0421\u043D\u0438\u043C\u043E\u043A \u044D\u043A\u0440\u0430\u043D\u0430
-    2026-10-24 183454 (1)"
+  m_Name: "DogHungerIcon (\u0441\u043D\u0438\u043C\u043E\u043A \u044D\u043A\u0440\u0430\u043D\u0430))))))"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2767,7 +2767,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DogNeed
   maxSatiety: 100
   currentSatiety: 100
-  decreaseRate: 3
+  decreaseRate: 0.23
+  startingSatietyPercent: 0.5
   warningThreshold: 0.3
   dogCanvasObject: {fileID: 352844845}
   satietySlider: {fileID: 1908558082}

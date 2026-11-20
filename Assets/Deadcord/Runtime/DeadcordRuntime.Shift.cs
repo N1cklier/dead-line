@@ -25,6 +25,46 @@ public partial class DeadcordRuntime
         RefreshInstructions();
         RefreshStatusUI();
     }
+    private float GetShiftDurationSeconds()
+    {
+        float duration = 0f;
+        for (int i = 0; i < _waveRules.waves.Length; i++)
+        {
+            WaveDefinition wave = _waveRules.waves[i];
+
+            if (wave != null)
+                duration += Mathf.Max(1f, wave.durationSeconds);
+        }
+        return duration > 0f ? duration : 180f;
+    }
+
+
+    private void CompleteShift()
+    {
+        if (_shiftEnded)
+            return;
+
+        _shiftEnded = true;
+        _nextNpcMessageAt = float.PositiveInfinity;
+        _nextWaveAt = float.PositiveInfinity;
+        _activeIncidents.Clear();
+
+        if (_typingRowObject != null)
+            _typingRowObject.SetActive(false);
+
+        if (_inputRowObject != null)
+            _inputRowObject.SetActive(false);
+
+        RefreshTypingIndicator();
+        RefreshStatusUI();
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.GameOver(
+                "СМЕНА ЗАКОНЧИЛАСЬ!\n"
+            );
+        }
+    }
 
     private void AcceptRulesReaction()
     {
@@ -32,6 +72,10 @@ public partial class DeadcordRuntime
             return;
 
         _shiftAccepted = true;
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.MarkShiftStarted();
+        }
         _shiftElapsed = 0f;
         _waveIndex = 0;
         _nextStoryIndex = 0;

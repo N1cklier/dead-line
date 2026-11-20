@@ -7,6 +7,9 @@ public class PlayerHunger : MonoBehaviour
     [Header("Параметры голода игрока")]
     public float maxSatiety = 100f;
     public float currentSatiety = 100f;
+    [Header("Начальная сытость")]
+    [Range(0f, 1f)]
+    public float startingSatietyPercent = 0.5f;//в инспекторе теперь
     public float decreaseRate = 2.5f; // Скорость, с которой голодает сам персонаж
     public float feedSelfRate = 35f;  // Скорость восстановления при еде у холодильника
 
@@ -17,6 +20,7 @@ public class PlayerHunger : MonoBehaviour
     public Slider playerSatietySlider;
     public Image playerSliderFillImage;
     public GameObject meatIconInHand; // Иконка в UI, показывающая, что в руке мясо
+    public GameObject satietyIcon;
 
     [Header("Цвета шкалы")]
     public Color normalColor = Color.green;
@@ -27,16 +31,21 @@ public class PlayerHunger : MonoBehaviour
 
     void Start()
     {
-        currentSatiety = maxSatiety;
+        currentSatiety = maxSatiety * Mathf.Clamp01(startingSatietyPercent);
         hasMeatInHand = false;
         UpdateUI();
     }
 
     void Update()
     {
-        // 1. Персонаж постоянно расходует сытость
-        currentSatiety -= decreaseRate * Time.deltaTime;
-        currentSatiety = Mathf.Clamp(currentSatiety, 0f, maxSatiety);
+        if (GameManager.Instance != null && GameManager.Instance.IsGameOver)//больше не умирает от голода, если станет съеден собакой
+            return;
+        // 1. Персонаж постоянно расходует сытость после начала смены
+        if (GameManager.Instance == null || GameManager.Instance.HasShiftStarted)
+        {
+            currentSatiety -= decreaseRate * Time.deltaTime;
+            currentSatiety = Mathf.Clamp(currentSatiety, 0f, maxSatiety);
+        }
 
         // 2. Геймовер, если игрок умер от голода сам
         if (currentSatiety <= 0f)

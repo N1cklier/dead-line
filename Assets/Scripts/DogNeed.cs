@@ -9,6 +9,10 @@ public class DogNeed : MonoBehaviour
     public float currentSatiety = 100f;
     public float decreaseRate = 4f;
 
+    [Header("Ќачальна€ сытость")]
+    [Range(0f, 1f)]
+    public float startingSatietyPercent = 0.5f;
+
     [Header("ѕороги")]
     public float warningThreshold = 0.3f;
 
@@ -28,7 +32,7 @@ public class DogNeed : MonoBehaviour
 
     void Start()
     {
-        currentSatiety = maxSatiety;
+        currentSatiety = maxSatiety * Mathf.Clamp01(startingSatietyPercent);
         if (dogCanvasObject != null) dogCanvasObject.SetActive(false);
         if (warningIcon != null) warningIcon.SetActive(false);
         UpdateUI();
@@ -36,9 +40,14 @@ public class DogNeed : MonoBehaviour
 
     void Update()
     {
-        // 1. —обака посто€нно голодает
-        currentSatiety -= decreaseRate * Time.deltaTime;
-        currentSatiety = Mathf.Clamp(currentSatiety, 0f, maxSatiety);
+        if (GameManager.Instance != null && GameManager.Instance.IsGameOver)//более не убивает повторно, если персонаж умер от голода
+            return;
+        // 1. —обака посто€нно голодает после начала смены
+        if (GameManager.Instance == null || GameManager.Instance.HasShiftStarted)
+        {
+            currentSatiety -= decreaseRate * Time.deltaTime;
+            currentSatiety = Mathf.Clamp(currentSatiety, 0f, maxSatiety);
+        }
 
         // 2.  ормление собаки: если игрок р€дом, в руке есть м€со и нажата E
         if (isPlayerInTrigger && Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
