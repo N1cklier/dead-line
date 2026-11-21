@@ -264,6 +264,7 @@ public partial class DeadcordRuntime : MonoBehaviour
         public int wave;
         public string title;
         public float durationSeconds;
+        public int maxConcurrentIncidents;
         public string announcement;
         public string[] instructions;
         public string[] unlockedCategories;

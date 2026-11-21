@@ -34,6 +34,15 @@ public partial class DeadcordRuntime
         return fallback;
     }
 
+    private int GetMaxConcurrentIncidents()
+    {
+        if (_waveRules == null || _waveRules.waves == null || _waveRules.waves.Length == 0)
+            return 1;
+
+        WaveDefinition wave = _waveRules.waves[Mathf.Clamp(_waveIndex, 0, _waveRules.waves.Length - 1)];
+        return wave != null && wave.maxConcurrentIncidents > 0 ? wave.maxConcurrentIncidents : 1;
+    }
+
     private string Pick(string[] values, string fallback)
     {
         if (values == null || values.Length == 0) return fallback;
@@ -65,10 +74,10 @@ public partial class DeadcordRuntime
         for (int i = 0; i < _users.Count; i++)
         {
             UserData user = _users[i];
-            if (!user.banned && user.mutedUntil <= _shiftElapsed)
+            bool alreadyOffending = _activeIncidents.Exists(inc => inc != null && !inc.resolved && inc.target == user);
+            if (!user.banned && user.mutedUntil <= _shiftElapsed && !alreadyOffending)
                 candidates.Add(user);
         }
-
         if (candidates.Count == 0)
             return GetOrCreateUser(GenerateUsername());
         return candidates[UnityEngine.Random.Range(0, candidates.Count)];
@@ -83,7 +92,7 @@ public partial class DeadcordRuntime
             Mathf.Max(npcMessageIntervalMin + 0.1f, npcMessageIntervalMax)) * npcMessageIntervalMultiplier;
         UserData speaker = PickActiveUser();
 
-        if (_shiftElapsed >= 20f && _activeIncidents.Count == 0 && UnityEngine.Random.value < violationChance)
+        if (_shiftElapsed >= 20f && _activeIncidents.Count < GetMaxConcurrentIncidents() && UnityEngine.Random.value < violationChance)
         {
             List<ViolationDefinition> available = GetAvailableViolations();
             if (available.Count > 0)
@@ -141,7 +150,7 @@ public partial class DeadcordRuntime
         if (target == null || definition == null || target.banned)
             return;
 
-        if (!forceStory && (_activeIncidents.Count > 0 || !IsCategoryUnlocked(definition.category)))
+        if (!forceStory && (_activeIncidents.Count >= GetMaxConcurrentIncidents() || !IsCategoryUnlocked(definition.category)))
             return;
 
         float delay = helperDeadlineBaseSeconds + UnityEngine.Random.Range(-helperDeadlineVarianceSeconds, helperDeadlineVarianceSeconds);
