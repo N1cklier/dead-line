@@ -4,6 +4,8 @@ using UnityEngine.InputSystem;
 
 public class DogNeed : MonoBehaviour
 {
+    public static bool IsCritical { get; private set; }
+
     [Header("Параметры")]
     public float maxSatiety = 100f;
     public float currentSatiety = 100f;
@@ -29,40 +31,52 @@ public class DogNeed : MonoBehaviour
 
     private bool isPlayerInTrigger = false;
     private PlayerHunger playerHunger;
+    private Vector3 _warningBaseScale;
+    private bool _hasWarningBaseScale = false;
 
     void Start()
     {
+        IsCritical = false;
         currentSatiety = maxSatiety * Mathf.Clamp01(startingSatietyPercent);
         if (dogCanvasObject != null) dogCanvasObject.SetActive(false);
-        if (warningIcon != null) warningIcon.SetActive(false);
+
+        if (warningIcon != null)
+        {
+            _warningBaseScale = warningIcon.transform.localScale;
+            _hasWarningBaseScale = true;
+            warningIcon.SetActive(false);
+        }
+
         UpdateUI();
     }
 
     void Update()
     {
-        if (GameManager.Instance != null && GameManager.Instance.IsGameOver)//более не убивает повторно, если персонаж умер от голода
+        if (GameManager.Instance != null && GameManager.Instance.IsGameOver)
+        {
+            IsCritical = false;
             return;
-        // 1. Собака постоянно голодает после начала смены
+        }
+
         if (GameManager.Instance == null || GameManager.Instance.HasShiftStarted)
         {
             currentSatiety -= decreaseRate * Time.deltaTime;
             currentSatiety = Mathf.Clamp(currentSatiety, 0f, maxSatiety);
         }
 
-        // 2. Кормление собаки: если игрок рядом, в руке есть мясо и нажата E
         if (isPlayerInTrigger && Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame)
         {
             if (playerHunger != null && playerHunger.hasMeatInHand)
             {
-                currentSatiety = maxSatiety; // Полностью восстанавливаем сытость пса
-                playerHunger.hasMeatInHand = false; // Тратим мясо из руки
+                currentSatiety = maxSatiety;
+                playerHunger.hasMeatInHand = false;
                 if (TutorialManager.Instance != null) TutorialManager.Instance.NotifyDogFed();
             }
         }
 
-        // 3. Геймовер: собака съела игрока
         if (currentSatiety <= 0f)
         {
+            IsCritical = false;
             if (GameManager.Instance != null)
             {
                 GameManager.Instance.GameOver(GameManager.Instance.dogGameOverText);
@@ -123,17 +137,27 @@ public class DogNeed : MonoBehaviour
     void HandleGlobalWarning()
     {
         float ratio = currentSatiety / maxSatiety;
-        bool isCritical = ratio <= warningThreshold;
+        IsCritical = ratio <= warningThreshold;
 
-        if (warningIcon != null)
+        if (warningIcon == null) return;
+
+        if (!_hasWarningBaseScale)
         {
-            warningIcon.SetActive(isCritical);
+            _warningBaseScale = warningIcon.transform.localScale;
+            _hasWarningBaseScale = true;
+        }
 
-            if (isCritical)
-            {
-                float scale = 1f + Mathf.Sin(Time.time * 10f) * 0.2f;
-                warningIcon.transform.localScale = new Vector3(scale, scale, scale);
-            }
+        bool anyCritical = PlayerHunger.IsCritical || IsCritical;
+        warningIcon.SetActive(anyCritical);
+
+        if (anyCritical)
+        {
+            float pulse = 1f + Mathf.Sin(Time.time * 10f) * 0.1f;
+            warningIcon.transform.localScale = _warningBaseScale * pulse;
+        }
+        else
+        {
+            warningIcon.transform.localScale = _warningBaseScale;
         }
     }
 }

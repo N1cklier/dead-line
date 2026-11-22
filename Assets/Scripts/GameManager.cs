@@ -31,6 +31,8 @@ public class GameManager : MonoBehaviour
     public string reputationGameOverText = "ВАС УВОЛИЛИ!\nРепутация модератора упала до нуля.";
     [TextArea(2, 5)]
     public string winText = "СМЕНА ЗАВЕРШЕНА!\nВы успешно отработали день и получили повышение!";
+    [TextArea(2, 5)]
+    public string shiftEndText = "СМЕНА ЗАВЕРШЕНА!\nРабочий день подошёл к концу.";
 
     private bool isGameOver = false;
 

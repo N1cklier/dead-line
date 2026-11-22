@@ -60,9 +60,7 @@ public partial class DeadcordRuntime
 
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.GameOver(
-                "СМЕНА ЗАКОНЧИЛАСЬ!\n"
-            );
+            GameManager.Instance.GameOver(GameManager.Instance.shiftEndText);
         }
     }
 

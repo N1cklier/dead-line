@@ -4,23 +4,30 @@ using UnityEngine.InputSystem;
 
 public class PlayerHunger : MonoBehaviour
 {
+    public static bool IsCritical { get; private set; }
+
     [Header("Параметры голода игрока")]
     public float maxSatiety = 100f;
     public float currentSatiety = 100f;
     [Header("Начальная сытость")]
     [Range(0f, 1f)]
-    public float startingSatietyPercent = 0.5f;//в инспекторе теперь
-    public float decreaseRate = 2.5f; // Скорость, с которой голодает сам персонаж
-    public float feedSelfRate = 35f;  // Скорость восстановления при еде у холодильника
+    public float startingSatietyPercent = 0.5f;
+    public float decreaseRate = 2.5f;
+    public float feedSelfRate = 35f;
+
+    [Header("Предупреждение")]
+    [Range(0f, 1f)]
+    public float warningThreshold = 0.3f;
 
     [Header("Инвентарь (1 слот)")]
-    public bool hasMeatInHand = false; // Есть ли в руке мясо для собаки
+    public bool hasMeatInHand = false;
 
     [Header("UI Ссылки")]
     public Slider playerSatietySlider;
     public Image playerSliderFillImage;
-    public GameObject meatIconInHand; // Иконка в UI, показывающая, что в руке мясо
+    public GameObject meatIconInHand;
     public GameObject satietyIcon;
+    public GameObject warningIcon;
 
     [Header("Цвета шкалы")]
     public Color normalColor = Color.green;
@@ -28,28 +35,43 @@ public class PlayerHunger : MonoBehaviour
     public Color criticalColor = Color.red;
 
     private bool isPlayerNearFridge = false;
+    private Vector3 _warningBaseScale;
+    private bool _hasWarningBaseScale = false;
 
     void Start()
     {
+        IsCritical = false;
         currentSatiety = maxSatiety * Mathf.Clamp01(startingSatietyPercent);
         hasMeatInHand = false;
+
+        if (warningIcon != null)
+        {
+            _warningBaseScale = warningIcon.transform.localScale;
+            _hasWarningBaseScale = true;
+            warningIcon.SetActive(false);
+        }
+
         UpdateUI();
+        HandleGlobalWarning();
     }
 
     void Update()
     {
-        if (GameManager.Instance != null && GameManager.Instance.IsGameOver)//больше не умирает от голода, если станет съеден собакой
+        if (GameManager.Instance != null && GameManager.Instance.IsGameOver)
+        {
+            IsCritical = false;
             return;
-        // 1. Персонаж постоянно расходует сытость после начала смены
+        }
+
         if (GameManager.Instance == null || GameManager.Instance.HasShiftStarted)
         {
             currentSatiety -= decreaseRate * Time.deltaTime;
             currentSatiety = Mathf.Clamp(currentSatiety, 0f, maxSatiety);
         }
 
-        // 2. Геймовер, если игрок умер от голода сам
         if (currentSatiety <= 0f)
         {
+            IsCritical = false;
             if (GameManager.Instance != null)
             {
                 GameManager.Instance.GameOver("ВЫ УМЕРИ С ГОЛОДУ!\nВы забыли поесть сами, работая за компьютером.");
@@ -58,16 +80,13 @@ public class PlayerHunger : MonoBehaviour
             return;
         }
 
-        // 3. Взаимодействие у холодильника
         if (isPlayerNearFridge && Keyboard.current != null)
         {
-            // Удерживание E — едим сами
             if (Keyboard.current.eKey.isPressed)
             {
                 if (TutorialManager.Instance != null) TutorialManager.Instance.NotifyPlayerAte();
                 currentSatiety = Mathf.Min(maxSatiety, currentSatiety + feedSelfRate * Time.deltaTime);
             }
-            // Нажатие R — берем мясо в руку для собаки (если слот свободен)
             else if (Keyboard.current.rKey.wasPressedThisFrame && !hasMeatInHand)
             {
                 hasMeatInHand = true;
@@ -75,6 +94,7 @@ public class PlayerHunger : MonoBehaviour
         }
 
         UpdateUI();
+        HandleGlobalWarning();
     }
 
     public void SetNearFridge(bool near)
@@ -92,8 +112,8 @@ public class PlayerHunger : MonoBehaviour
 
         if (playerSliderFillImage != null)
         {
-            float ratio = currentSatiety / maxSatiety;
-            if (ratio > 0.3f) playerSliderFillImage.color = normalColor;
+            float ratio = maxSatiety > 0f ? currentSatiety / maxSatiety : 0f;
+            if (ratio > warningThreshold) playerSliderFillImage.color = normalColor;
             else if (ratio > 0.15f) playerSliderFillImage.color = warningColor;
             else playerSliderFillImage.color = criticalColor;
         }
@@ -101,6 +121,33 @@ public class PlayerHunger : MonoBehaviour
         if (meatIconInHand != null)
         {
             meatIconInHand.SetActive(hasMeatInHand);
+        }
+    }
+
+    void HandleGlobalWarning()
+    {
+        float ratio = maxSatiety > 0f ? currentSatiety / maxSatiety : 0f;
+        IsCritical = ratio <= warningThreshold;
+
+        if (warningIcon == null) return;
+
+        if (!_hasWarningBaseScale)
+        {
+            _warningBaseScale = warningIcon.transform.localScale;
+            _hasWarningBaseScale = true;
+        }
+
+        bool anyCritical = IsCritical || DogNeed.IsCritical;
+        warningIcon.SetActive(anyCritical);
+
+        if (anyCritical)
+        {
+            float pulse = 1f + Mathf.Sin(Time.time * 10f) * 0.1f;
+            warningIcon.transform.localScale = _warningBaseScale * pulse;
+        }
+        else
+        {
+            warningIcon.transform.localScale = _warningBaseScale;
         }
     }
 }
