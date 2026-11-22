@@ -30,11 +30,21 @@ public class TutorialDialogueUI : MonoBehaviour
     private static readonly Color COLOR_NAME = new Color32(240, 178, 50, 255);
     private static readonly Color COLOR_OVERLAY = new Color(0f, 0f, 0f, 0.75f);
 
-    void Awake() { BuildUI(); HideInternal(); }
+    void Awake() {  }
+
+    public void SetFont(Font font)
+    {
+        _font = font;
+        if (_canvasObject == null)
+        {
+            BuildUI();
+            HideInternal();
+        }
+    }
 
     void BuildUI()
     {
-        _font = Resources.Load<Font>("Fonts/THBiolinum");
+        if (_font == null) _font = Resources.Load<Font>("Fonts/THBiolinum");
         if (_font == null) _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         if (_font == null) _font = Resources.GetBuiltinResource<Font>("Arial.ttf");
 

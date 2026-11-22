@@ -286,6 +286,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b24100b31d306b24d8bc38263d1299da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TutorialManager
+  tutorialFont: {fileID: 12800000, guid: e48aacf34ac6c7241b142eb84f6d9a4e, type: 3}
   dataFolder: TutorialData
   dataFileName: TutorialDialogue
   introLines:
@@ -1571,6 +1572,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b24100b31d306b24d8bc38263d1299da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TutorialManager
+  tutorialFont: {fileID: 12800000, guid: e48aacf34ac6c7241b142eb84f6d9a4e, type: 3}
   dataFolder: TutorialData
   dataFileName: TutorialDialogue
   introLines:

@@ -8,6 +8,9 @@ public class TutorialManager : MonoBehaviour
 
     public enum TutorialState { Intro, NeedFood, NeedDog, Complete }
 
+    [Header("Шрифт")]
+    public Font tutorialFont;
+
     [Header("Data (JSON lives under Assets/Resources/TutorialData)")]
     [SerializeField] private string dataFolder = "TutorialData";
     [SerializeField] private string dataFileName = "TutorialDialogue";
@@ -95,6 +98,7 @@ public class TutorialManager : MonoBehaviour
             var go = new GameObject("TutorialDialogueUI");
             _ui = go.AddComponent<TutorialDialogueUI>();
         }
+        _ui.SetFont(tutorialFont);
         StartCoroutine(StartIntroNextFrame());
     }
 

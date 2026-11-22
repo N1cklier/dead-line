@@ -94,7 +94,9 @@ public class TutorialHintUI : MonoBehaviour
 
     void BuildCanvas()
     {
-        _font = Resources.Load<Font>("Fonts/THBiolinum");
+        _font = (TutorialManager.Instance != null && TutorialManager.Instance.tutorialFont != null)
+            ? TutorialManager.Instance.tutorialFont
+            : Resources.Load<Font>("Fonts/THBiolinum");
         if (_font == null) _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         if (_font == null) _font = Resources.GetBuiltinResource<Font>("Arial.ttf");
 
