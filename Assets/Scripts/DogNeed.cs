@@ -56,6 +56,7 @@ public class DogNeed : MonoBehaviour
             {
                 currentSatiety = maxSatiety; // Полностью восстанавливаем сытость пса
                 playerHunger.hasMeatInHand = false; // Тратим мясо из руки
+                if (TutorialManager.Instance != null) TutorialManager.Instance.NotifyDogFed();
             }
         }
 

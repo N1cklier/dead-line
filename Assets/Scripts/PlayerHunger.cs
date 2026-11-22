@@ -64,6 +64,7 @@ public class PlayerHunger : MonoBehaviour
             // ”держивание E Ч едим сами
             if (Keyboard.current.eKey.isPressed)
             {
+                if (TutorialManager.Instance != null) TutorialManager.Instance.NotifyPlayerAte();
                 currentSatiety = Mathf.Min(maxSatiety, currentSatiety + feedSelfRate * Time.deltaTime);
             }
             // Ќажатие R Ч берем м€со в руку дл€ собаки (если слот свободен)

@@ -257,6 +257,75 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 74344352}
   m_CullTransparentMesh: 1
+--- !u!1 &227293083
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 227293085}
+  - component: {fileID: 227293084}
+  m_Layer: 0
+  m_Name: TutorialDialogueUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &227293084
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 227293083}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b24100b31d306b24d8bc38263d1299da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TutorialManager
+  introLines:
+  - "\u0422\u0430\u043A, \u044F \u0434\u043E\u043C\u0430. \u041D\u0430\u043A\u043E\u043D\u0435\u0446-\u0442\u043E."
+  - "\u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u043D\u0430\u0434\u043E \u043F\u043E\u0435\u0441\u0442\u044C
+    \u0441\u0430\u043C\u043E\u043C\u0443, \u0430 \u043F\u043E\u0442\u043E\u043C \u0432\u0437\u044F\u0442\u044C
+    \u043C\u044F\u0441\u043E \u0432 \u0445\u043E\u043B\u043E\u0434\u0438\u043B\u044C\u043D\u0438\u043A\u0435
+    \u0438 \u043F\u043E\u043A\u043E\u0440\u043C\u0438\u0442\u044C \u0441\u043E\u0431\u0430\u043A\u0443."
+  - "\u041F\u043E\u043A\u0430 \u043E\u0431\u0430 \u0434\u0435\u043B\u0430 \u043D\u0435
+    \u0441\u0434\u0435\u043B\u0430\u043D\u044B \u2014 \u0437\u0430 \u043A\u043E\u043C\u043F\u044C\u044E\u0442\u0435\u0440
+    \u0434\u0430\u0436\u0435 \u043D\u0435 \u0441\u0430\u0436\u0443\u0441\u044C."
+  outroLines:
+  - "\u041D\u0443 \u0432\u0441\u0451 \u2014 \u0441\u0430\u043C \u043F\u043E\u0435\u043B,
+    \u0441\u043E\u0431\u0430\u043A\u0443 \u043D\u0430\u043A\u043E\u0440\u043C\u0438\u043B.
+    \u041F\u043E\u0440\u0430 \u043F\u0440\u0438\u0441\u0442\u0443\u043F\u0430\u0442\u044C
+    \u043A \u0441\u043C\u0435\u043D\u0435."
+  computerBlockedWhenBoth:
+  - "\u041D\u0435 \u0441\u0435\u0439\u0447\u0430\u0441. \u0421\u043D\u0430\u0447\u0430\u043B\u0430
+    \u043F\u043E\u0435\u0441\u0442\u044C \u0438 \u043F\u043E\u043A\u043E\u0440\u043C\u0438\u0442\u044C
+    \u0441\u043E\u0431\u0430\u043A\u0443."
+  computerBlockedOnlyFood:
+  - "\u0422\u044B \u0435\u0449\u0451 \u043D\u0435 \u043F\u043E\u0435\u043B \u0441\u0430\u043C.
+    \u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u0435\u0434\u0430."
+  computerBlockedOnlyDog:
+  - "\u0421\u043E\u0431\u0430\u043A\u0430 \u0433\u043E\u043B\u043E\u0434\u043D\u0430\u044F.
+    \u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u043F\u043E\u043A\u043E\u0440\u043C\u0438
+    \u0435\u0451."
+--- !u!4 &227293085
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 227293083}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &229733965
 GameObject:
   m_ObjectHideFlags: 0
@@ -554,6 +623,37 @@ RectTransform:
   m_AnchoredPosition: {x: -0.000091552734, y: 0.00048828125}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &330447708
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 330447709}
+  m_Layer: 0
+  m_Name: TutorialHintUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &330447709
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 330447708}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -1449,7 +1549,79 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 8a95c75a204619245889d53ab3d9befd, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1197620478}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 8a95c75a204619245889d53ab3d9befd, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1197620480}
   m_SourcePrefab: {fileID: 100100000, guid: 8a95c75a204619245889d53ab3d9befd, type: 3}
+--- !u!1 &1007752680
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1007752681}
+  - component: {fileID: 1007752682}
+  m_Layer: 0
+  m_Name: TutorialManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1007752681
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1007752680}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1007752682
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1007752680}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b24100b31d306b24d8bc38263d1299da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TutorialManager
+  introLines:
+  - "\u0422\u0430\u043A, \u044F \u0434\u043E\u043C\u0430. \u041D\u0430\u043A\u043E\u043D\u0435\u0446-\u0442\u043E."
+  - "\u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u043D\u0430\u0434\u043E \u043F\u043E\u0435\u0441\u0442\u044C
+    \u0441\u0430\u043C\u043E\u043C\u0443, \u0430 \u043F\u043E\u0442\u043E\u043C \u0432\u0437\u044F\u0442\u044C
+    \u043C\u044F\u0441\u043E \u0432 \u0445\u043E\u043B\u043E\u0434\u0438\u043B\u044C\u043D\u0438\u043A\u0435
+    \u0438 \u043F\u043E\u043A\u043E\u0440\u043C\u0438\u0442\u044C \u0441\u043E\u0431\u0430\u043A\u0443."
+  - "\u041F\u043E\u043A\u0430 \u043E\u0431\u0430 \u0434\u0435\u043B\u0430 \u043D\u0435
+    \u0441\u0434\u0435\u043B\u0430\u043D\u044B \u2014 \u0437\u0430 \u043A\u043E\u043C\u043F\u044C\u044E\u0442\u0435\u0440
+    \u0434\u0430\u0436\u0435 \u043D\u0435 \u0441\u0430\u0436\u0443\u0441\u044C."
+  outroLines:
+  - "\u041D\u0443 \u0432\u0441\u0451 \u2014 \u0441\u0430\u043C \u043F\u043E\u0435\u043B,
+    \u0441\u043E\u0431\u0430\u043A\u0443 \u043D\u0430\u043A\u043E\u0440\u043C\u0438\u043B.
+    \u041F\u043E\u0440\u0430 \u043F\u0440\u0438\u0441\u0442\u0443\u043F\u0430\u0442\u044C
+    \u043A \u0441\u043C\u0435\u043D\u0435."
+  computerBlockedWhenBoth:
+  - "\u041D\u0435 \u0441\u0435\u0439\u0447\u0430\u0441. \u0421\u043D\u0430\u0447\u0430\u043B\u0430
+    \u043F\u043E\u0435\u0441\u0442\u044C \u0438 \u043F\u043E\u043A\u043E\u0440\u043C\u0438\u0442\u044C
+    \u0441\u043E\u0431\u0430\u043A\u0443."
+  computerBlockedOnlyFood:
+  - "\u0422\u044B \u0435\u0449\u0451 \u043D\u0435 \u043F\u043E\u0435\u043B \u0441\u0430\u043C.
+    \u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u0435\u0434\u0430."
+  computerBlockedOnlyDog:
+  - "\u0421\u043E\u0431\u0430\u043A\u0430 \u0433\u043E\u043B\u043E\u0434\u043D\u0430\u044F.
+    \u0421\u043D\u0430\u0447\u0430\u043B\u0430 \u043F\u043E\u043A\u043E\u0440\u043C\u0438
+    \u0435\u0451."
 --- !u!1 &1173382959
 GameObject:
   m_ObjectHideFlags: 0
@@ -1621,6 +1793,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10c83d2fecb519f4fa5bc92d467b48e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FridgeInteraction
+--- !u!114 &1197620480
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1197620477}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b81b01b70c895de45bec6284024d4cd6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TutorialHint
+  keyLabel: E
+  actionText: "\u041F\u043E\u0435\u0441\u0442\u044C"
+  displayDuration: 4
+  showOnlyOnce: 1
+  autoCreateTrigger: 1
+  triggerSize: {x: 2, y: 2, z: 2}
+  triggerOffset: {x: 0, y: 0, z: 0}
 --- !u!1 &1211656176
 GameObject:
   m_ObjectHideFlags: 0
@@ -2387,6 +2578,7 @@ GameObject:
   - component: {fileID: 1764043182}
   - component: {fileID: 1764043181}
   - component: {fileID: 1764043185}
+  - component: {fileID: 1764043186}
   m_Layer: 0
   m_Name: Computer
   m_TagString: Untagged
@@ -2501,6 +2693,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ComputerInteraction
   chatPanel: {fileID: 1452302088}
+--- !u!114 &1764043186
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1764043179}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b81b01b70c895de45bec6284024d4cd6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TutorialHint
+  keyLabel: E
+  actionText: "\u041E\u0442\u043A\u0440\u044B\u0442\u044C Deadcord"
+  displayDuration: 4
+  showOnlyOnce: 1
+  autoCreateTrigger: 1
+  triggerSize: {x: 2, y: 2, z: 2}
+  triggerOffset: {x: 0, y: 0, z: 0}
 --- !u!1 &1908558080
 GameObject:
   m_ObjectHideFlags: 0
@@ -2746,6 +2957,7 @@ GameObject:
   - component: {fileID: 2140299305}
   - component: {fileID: 2140299304}
   - component: {fileID: 2140299309}
+  - component: {fileID: 2140299310}
   m_Layer: 0
   m_Name: Dog
   m_TagString: Player
@@ -2882,6 +3094,26 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2140299303}
   m_CullTransparentMesh: 1
+--- !u!114 &2140299310
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2140299303}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b81b01b70c895de45bec6284024d4cd6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TutorialHint
+  keyLabel: E
+  actionText: "\u041F\u043E\u043A\u043E\u0440\u043C\u0438\u0442\u044C (\u0435\u0434\u0430
+    \u0436\u0435 \u0443 \u043C\u0435\u043D\u044F \u0441 \u0441\u043E\u0431\u043E\u0439?)"
+  displayDuration: 4
+  showOnlyOnce: 1
+  autoCreateTrigger: 1
+  triggerSize: {x: 2, y: 2, z: 2}
+  triggerOffset: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -2897,3 +3129,6 @@ SceneRoots:
   - {fileID: 2140299308}
   - {fileID: 1764043184}
   - {fileID: 922415056}
+  - {fileID: 1007752681}
+  - {fileID: 227293085}
+  - {fileID: 330447709}
